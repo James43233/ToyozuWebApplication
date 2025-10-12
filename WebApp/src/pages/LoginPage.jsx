@@ -1,106 +1,115 @@
 "use client"
 
 import React, { useState } from "react"
-import { useNavigate } from 'react-router-dom';
-import logo from "../assets/Arrival.png";
-import emailLogo from "../assets/download.png";
-import passLogo from "../assets/password icon.png";
+import { useNavigate } from "react-router-dom"
+import logo from "../assets/Arrival.png"
+import emailLogo from "../assets/download.png"
+import passLogo from "../assets/password icon.png"
 
 export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false)
   const [emailOrUsername, setEmailOrUsername] = useState("")
   const [password, setPassword] = useState("")
-  const navigate = useNavigate();
-  
+  const navigate = useNavigate()
+
   // MFA related states
-  const [mfaModalOpen, setMfaModalOpen] = useState(false);
-  const [mfaCode, setMfaCode] = useState('');
-  const [verifyingMfa, setVerifyingMfa] = useState(false);
-  const [mfaError, setMfaError] = useState('');
-  const [pendingRoleId, setPendingRoleId] = useState(null);
-  const [mfaMethod, setMfaMethod] = useState('email');
-  const [mfaStep, setMfaStep] = useState(0); // 0 = choose method, 1 = enter code
-  const [userEmail, setUserEmail] = useState('');
-  const [userPhone, setUserPhone] = useState('');
+  const [mfaModalOpen, setMfaModalOpen] = useState(false)
+  const [mfaCode, setMfaCode] = useState("")
+  const [verifyingMfa, setVerifyingMfa] = useState(false)
+  const [mfaError, setMfaError] = useState("")
+  const [pendingRoleId, setPendingRoleId] = useState(null)
+  const [mfaMethod, setMfaMethod] = useState("email")
+  const [mfaStep, setMfaStep] = useState(0)
+  const [userEmail, setUserEmail] = useState("")
+  const [userPhone, setUserPhone] = useState("")
 
-  // Helper function to determine if input is email or username
-  const isEmail = (input) => {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return emailRegex.test(input);
-  };
+  // Determine if input is email
+  const isEmail = (input) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(input)
 
-  // Handles the initial login request
+  // --- LOGIN SUBMIT ---
   const handleSubmit = async (e) => {
-    e.preventDefault();
+    e.preventDefault()
 
-    // Prepare login payload based on input type
-    const loginPayload = isEmail(emailOrUsername) 
+    const loginPayload = isEmail(emailOrUsername)
       ? { email: emailOrUsername, password }
-      : { username: emailOrUsername, password };
+      : { username: emailOrUsername, password }
 
     try {
-      const response = await fetch('http://localhost:8000/api/login/', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+      const response = await fetch("http://localhost:8000/api/login/", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(loginPayload),
-      });
+      })
 
-      const data = await response.json();
+      const data = await response.json()
 
       if (response.ok) {
+        // If OTP required, open MFA modal
         if (data.otp_required) {
-          if (data.role_Id) setPendingRoleId(data.role_Id);
-          setUserEmail(data.email || 'No email on file');
-          setUserPhone(data.phone || 'No phone on file');
-          setMfaModalOpen(true);
-          setMfaStep(0); // Start at method selection
+          if (data.role_id) setPendingRoleId(data.role_id)
+          setUserEmail(data.email || "No email on file")
+          setUserPhone(data.phone || "No phone on file")
+          setMfaModalOpen(true)
+          setMfaStep(0)
         }
       } else {
-        console.error('Login failed:', data.error || data.detail);
-        alert(data.error || data.detail);
+        alert(data.error || data.detail || "Login failed.")
       }
     } catch (error) {
-      console.error('Error during login:', error);
-      alert('Something went wrong. Please try again.');
+      console.error("Error during login:", error)
+      alert("Something went wrong. Please try again.")
     }
-  };
+  }
 
-  // Simulate sending OTP and advance to code entry
+  // --- SEND OTP ---
   const handleSendOtp = async (method) => {
-    setMfaMethod(method);
-    setMfaStep(1);
-    setMfaError('');
-    // Here you would call your backend to send the OTP to the selected method
-    // e.g., await fetch('/api/request-otp/', { ... });
-  };
+    setMfaMethod(method)
+    setMfaStep(1)
+    setMfaError("")
+    // (You can call your backend here to send OTP)
+  }
 
-  // Handles MFA code verification
+  // --- VERIFY MFA ---
   const handleMfaVerify = async (e) => {
-    e.preventDefault();
-    setVerifyingMfa(true);
-    setMfaError('');
-    
-    // Use the original input for username in MFA verification
-    const usernameForMfa = isEmail(emailOrUsername) ? emailOrUsername : emailOrUsername;
-    
-    try {
-      const response = await fetch('http://localhost:8000/api/verify-otp/', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ username: usernameForMfa, token: mfaCode, method: mfaMethod }),
-      });
+    e.preventDefault()
+    setVerifyingMfa(true)
+    setMfaError("")
 
-      const data = await response.json();
+    const usernameForMfa = emailOrUsername
+
+    try {
+      const response = await fetch("http://localhost:8000/api/verify-otp/", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username: usernameForMfa, token: mfaCode, method: mfaMethod }),
+      })
+
+      const data = await response.json()
 
       if (response.ok) {
-        if (data.access) localStorage.setItem('access_token', data.access);
-        if (data.refresh) localStorage.setItem('refresh_token', data.refresh);
-        const roleIdToStore = data.role_Id || pendingRoleId;
-        if (roleIdToStore) localStorage.setItem('role_Id', roleIdToStore);
+        console.log("✅ Login success — backend response:", data);
+
+        // Save tokens
+        if (data.access) localStorage.setItem("access_token", data.access);
+        if (data.refresh) localStorage.setItem("refresh_token", data.refresh);
+
+        // Save role
+        const roleIdToStore = data.role_id || pendingRoleId;
+        if (roleIdToStore) localStorage.setItem("role_id", roleIdToStore);
+
+        // ✅ Fix: If backend doesn't return user_id, create user object from available fields
+        const userData = {
+          user_id: data.user_id || data.id || data.pk || null, // fallback chain
+          username: data.username || "",
+          email: data.email || "",
+          role_id: roleIdToStore || data.role_id || null,
+        };
+
+        localStorage.setItem("user", JSON.stringify(userData));
+        if (userData.user_id) localStorage.setItem("user_id", userData.user_id);
+
+        console.log("✅ Login success — stored user object:", userData);
+
         setMfaModalOpen(false);
         setMfaCode('');
         setMfaStep(0);
@@ -108,22 +117,24 @@ export default function LoginPage() {
       } else {
         setMfaError(data.error || data.detail || "Invalid MFA code.");
       }
-    } catch (error) {
-      setMfaError("Something went wrong. Please try again.");
-    }
-    setVerifyingMfa(false);
-  };
 
-  // Redirect user based on role_Id
-  const redirectByRole = (roleId) => {
-    if (roleId === 1 || roleId === "1") {
-      navigate('/Start');
-    } else if (roleId === 2 || roleId === "2" || roleId === 3 || roleId === "") {
-      navigate('/Start');
-    } else {
-      navigate('/Start');
+    } catch (error) {
+      console.error("❌ MFA verification failed:", error)
+      setMfaError("Something went wrong. Please try again.")
     }
-  };
+    setVerifyingMfa(false)
+  }
+
+  // --- REDIRECT BASED ON ROLE ---
+  const redirectByRole = (roleId) => {
+    const id = parseInt(roleId, 10)
+    if (id === 1) navigate("/AdminDashboard")
+    else navigate("/Start")
+  }
+
+  console.log("Saved role_id:", localStorage.getItem("role_id"))
+
+
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-red-100 via-white to-red-100 flex flex-col items-center justify-center p-4 relative overflow-hidden">

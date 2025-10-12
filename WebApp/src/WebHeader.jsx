@@ -1,15 +1,36 @@
 import './App.css';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Logo from "./assets/Arrival.png";
 import { Search, ShoppingCart, User } from "lucide-react";
+import axios from "axios";
 
 function WebHeader() {
   const navigate = useNavigate();
   const [menuOpen, setMenuOpen] = useState(false);
+  const [cartItems, setCartItems] = useState([]);
+  const [cartCount, setCartCount] = useState(0);
+  const userId = localStorage.getItem("user_id");
+
 
   const isLoggedIn = !!localStorage.getItem("access_token");
-  const roleId = localStorage.getItem("role_Id"); // get role from storage
+  const roleid = localStorage.getItem("role_id"); // get role from storage
+
+
+  useEffect(() => {
+    if (!userId) return;
+
+    // Fetch the user's cart count
+    axios
+      .get(`http://localhost:8000/api/cart/?user=${userId}`)
+      .then((response) => {
+        setCartCount(response.data.length || 0);
+      })
+      .catch((error) => {
+        console.error("Error fetching cart:", error);
+        setCartCount(0);
+      });
+  }, [userId]);
 
   const handleLogout = () => {
     localStorage.clear();
@@ -42,11 +63,16 @@ function WebHeader() {
 
       {/* Right Side */}
       <div className="flex items-center space-x-6 relative justify-center flex-1 gap-10 ">
-        {/* Cart */}
-        <ShoppingCart
-          className="w-6 h-6 text-gray-700 cursor-pointer hover:text-red-600 transition"
-          onClick={() => navigate("/Cart-demo")}
-        />
+        {/* Cart with item count badge */}
+        <div className="relative">
+          <ShoppingCart
+            className="w-6 h-6 text-gray-700 cursor-pointer hover:text-red-600 transition"
+            onClick={() => navigate("/Cart-demo")}
+          />
+          <span className="absolute -bottom-1 -right-2 bg-red-600 text-white text-xs font-semibold rounded-full w-4 h-4 flex items-center justify-center">
+            {cartCount || 0}
+          </span>
+        </div>
 
         {/* User Menu */}
         {isLoggedIn ? (
@@ -74,7 +100,7 @@ function WebHeader() {
                 </button>
 
                 {/* Admin Dashboard (only for roles 1,2,3) */}
-                {(roleId === "1" || roleId === "2" || roleId === "3") && (
+                {(roleid === "1" || roleid === "2" || roleid === "3") && (
                   <button
                     onClick={() => { setMenuOpen(false); navigate("/AdminDashboard"); }}
                     className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
@@ -94,12 +120,21 @@ function WebHeader() {
             )}
           </div>
         ) : (
-          <button
-            onClick={() => navigate("/LoginPage")}
-            className="text-sm font-medium text-gray-700 hover:text-blue-600 transition"
-          >
-            Sign In
-          </button>
+          <div className="flex items-center gap-4">
+            <button
+              onClick={() => navigate("/LoginPage")}
+              className="text-sm font-medium text-gray-700 hover:text-blue-600 transition"
+            >
+              Sign In
+            </button>
+            <span className="h-6 border-l border-red-600"></span>
+            <button
+              onClick={() => navigate("/Register")}
+              className="text-sm font-medium text-gray-700 hover:text-red-600 transition"
+            >
+              Sign Up
+            </button>
+          </div>
         )}
       </div>
     </div>

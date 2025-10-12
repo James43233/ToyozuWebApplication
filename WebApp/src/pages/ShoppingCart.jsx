@@ -1,34 +1,61 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import WebHeader from "../ShoppingCartHeader"
+import { useState, useEffect } from "react";
+import axios from "axios";
 
 export default function AddToCart({ product }) {
-  const [quantity, setQuantity] = useState(1)
-  const [isAdding, setIsAdding] = useState(false)
-  const [showSuccess, setShowSuccess] = useState(false)
+  const [quantity, setQuantity] = useState(1);
+  const [isAdding, setIsAdding] = useState(false);
+  const [showSuccess, setShowSuccess] = useState(false);
+  const [cartItems, setCartItems] = useState([]);
+
+  const userId = localStorage.getItem("user_id"); // adjust to match your login logic
+
+  useEffect(() => {
+    if (!userId) {
+      console.warn("No user logged in, skipping cart fetch");
+      return;
+    }
+
+    axios
+      .get(`http://localhost:8000/api/cart/?user=${userId}`)
+      .then((res) => setCartItems(res.data))
+      .catch((err) => console.error("Failed to fetch cart:", err));
+  }, [userId]);
+
+  const totalPrice = (product.selling_price * quantity).toFixed(2);
 
   const handleQuantityChange = (change) => {
-    const newQuantity = quantity + change
-    if (newQuantity >= 1 && newQuantity <= 99) {
-      setQuantity(newQuantity)
+    const newQuantity = quantity + change;
+    if (newQuantity >= 1 && newQuantity <= product.quantity) {
+      setQuantity(newQuantity);
     }
-  }
+  };
 
   const handleAddToCart = async () => {
-    setIsAdding(true)
+    if (!userId) {
+      alert("Please log in to add items to your cart.");
+      return;
+    }
 
-    // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 800))
+    setIsAdding(true);
+    try {
+      await axios.post("http://localhost:8000/api/cart/", {
+        user: parseInt(userId, 10),
+        product: product.product_id,
+        quantity,
+        price_at_addition: product.selling_price,
+      });
 
-    setIsAdding(false)
-    setShowSuccess(true)
-
-    // Hide success message after 3 seconds
-    setTimeout(() => setShowSuccess(false), 3000)
-  }
-
-  const totalPrice = (product.price * quantity).toFixed(2)
+      setShowSuccess(true);
+      setTimeout(() => setShowSuccess(false), 3000);
+    } catch (error) {
+      console.error("Error adding to cart:", error.response?.data || error.message);
+      alert("Failed to add to cart");
+    } finally {
+      setIsAdding(false);
+    }
+  };
 
   return (
     <div className="bg-white border border-gray-200 rounded-xl p-6 max-w-sm shadow-lg relative">
@@ -48,7 +75,6 @@ export default function AddToCart({ product }) {
       {/* Quantity Selector */}
       <div className="flex items-center justify-between mb-5">
         <span className="text-base font-semibold text-gray-700">Quantity:</span>
-
         <div className="flex items-center bg-red-50 rounded-lg p-1">
           <button
             onClick={() => handleQuantityChange(-1)}
@@ -56,7 +82,7 @@ export default function AddToCart({ product }) {
             className={`w-8 h-8 rounded-md border-none text-lg font-semibold flex items-center justify-center transition-colors ${
               quantity <= 1
                 ? "bg-gray-100 text-gray-400 cursor-not-allowed"
-                : "bg-[#eb0505] text-white cursor-pointer hover:bg-red-700"
+                : "bg-[#eb0505] text-white hover:bg-red-700"
             }`}
           >
             -
@@ -66,11 +92,11 @@ export default function AddToCart({ product }) {
 
           <button
             onClick={() => handleQuantityChange(1)}
-            disabled={quantity >= 99}
+            disabled={quantity >= product.quantity}
             className={`w-8 h-8 rounded-md border-none text-lg font-semibold flex items-center justify-center transition-colors ${
-              quantity >= 99
+              quantity >= product.quantity
                 ? "bg-gray-100 text-gray-400 cursor-not-allowed"
-                : "bg-[#eb0505] text-white cursor-pointer hover:bg-red-700"
+                : "bg-[#eb0505] text-white hover:bg-red-700"
             }`}
           >
             +
@@ -81,7 +107,7 @@ export default function AddToCart({ product }) {
       {/* Price Display */}
       <div className="flex justify-between items-center mb-6 p-4 bg-red-50 rounded-lg">
         <span className="text-base text-gray-700">Total Price:</span>
-        <span className="text-2xl font-bold text-[#eb0505] font-serif">${totalPrice}</span>
+        <span className="text-2xl font-bold text-[#eb0505] font-serif">₱{totalPrice}</span>
       </div>
 
       {/* Add to Cart Button */}
@@ -111,5 +137,5 @@ export default function AddToCart({ product }) {
         )}
       </button>
     </div>
-  )
+  );
 }

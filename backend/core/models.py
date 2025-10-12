@@ -5,8 +5,9 @@ from django.utils import timezone
 import random
 
 class Brand(models.Model):
-    brand_id = models.AutoField(primary_key=True, db_column='Brand_ID')
-    name = models.CharField(max_length=100, db_column='Brand_Name')
+    brand_id = models.AutoField(primary_key=True, db_column='brand_id')
+    name = models.CharField(max_length=100, db_column='name')
+    description = models.CharField(max_length=100, db_column='description')
 
     class Meta:
         db_table = 'brand'
@@ -16,8 +17,9 @@ class Brand(models.Model):
         return self.name
 
 class Category(models.Model):
-    category_id = models.AutoField(primary_key=True, db_column='Category_ID')
-    name = models.CharField(max_length=100, db_column='Category_Name')
+    category_id = models.AutoField(primary_key=True, db_column='category_id')
+    name = models.CharField(max_length=100, db_column='name')
+    description = models.CharField(max_length=100, db_column='description')
 
     class Meta:
         db_table = 'category'
@@ -27,8 +29,8 @@ class Category(models.Model):
         return self.name
     
 class Condition(models.Model):
-    condition_id = models.AutoField(primary_key=True, db_column='Condition_ID')
-    name = models.CharField(max_length=50, db_column='Condition_Name')
+    condition_id = models.AutoField(primary_key=True, db_column='condition_id')
+    name = models.CharField(max_length=50, db_column='name')
 
     class Meta:
         db_table = 'condition_item'
@@ -38,27 +40,95 @@ class Condition(models.Model):
         return self.name
 
 class Product(models.Model):
-    product_id = models.AutoField(primary_key=True, db_column='Product_ID')
-    name = models.CharField(max_length=255, db_column='Product_Name')
-    description = models.TextField(blank=True, db_column='Product_Description')
-    brand = models.ForeignKey(Brand, on_delete=models.CASCADE, db_column='Brand_ID')
-    category = models.ForeignKey(Category, on_delete=models.CASCADE, db_column='Category_ID')
-    purchase_price = models.DecimalField(max_digits=10, decimal_places=2, db_column='Purchase_Price')
-    selling_price = models.DecimalField(max_digits=10, decimal_places=2, db_column='Selling_Price')
-    quantity = models.IntegerField(db_column='Quantity')
+    product_id = models.AutoField(primary_key=True, db_column='product_id')
+    name = models.CharField(max_length=255, db_column='name')
+    description = models.TextField(blank=True, db_column='description')
+    brand = models.ForeignKey(Brand, on_delete=models.CASCADE, db_column='brand_id')
+    category = models.ForeignKey(Category, on_delete=models.CASCADE, db_column='category_id')
+    purchase_price = models.DecimalField(max_digits=10, decimal_places=2, db_column='purchase_price')
+    selling_price = models.DecimalField(max_digits=10, decimal_places=2, db_column='selling_price')
+    quantity = models.IntegerField(db_column='quantity')
+    weight = models.FloatField(default=0.5, db_column='weight')  # ✅ new field
 
     class Meta:
         db_table = 'product'
         managed = False
 
+class ProductImage(models.Model):
+    id = models.AutoField(primary_key=True)
+    product = models.ForeignKey(Product, related_name="images", on_delete=models.CASCADE, db_column='product_id')
+    image = models.ImageField(upload_to="products/", db_column='image')
+
+    class Meta:
+        db_table = 'product_image'
+        managed = False
+
+class Car(models.Model):
+    car_id = models.AutoField(primary_key=True)
+    make = models.CharField(max_length=255)
+    
+    class Meta:
+        db_table = 'cars'
+        managed = False
+
     def __str__(self):
-        return self.name
+        return self.make
+
+class CarModel(models.Model):
+    model_id = models.AutoField(primary_key=True)
+    car = models.ForeignKey(Car, on_delete=models.CASCADE, related_name="models")
+    model_name = models.CharField(max_length=255)
+    
+    class Meta: 
+        db_table = 'car_models'
+        managed = False
+
+    def __str__(self):
+        return f"{self.car.make} {self.model_name}"
+    
+class ProductYear(models.Model):
+    year_id = models.AutoField(primary_key=True, db_column="year_id")
+    year = models.IntegerField(db_column="year")
+
+    class Meta:
+        db_table = "product_years"
+        managed = False   # or True if you want Django to manage it
+class ProductCarCompatibility(models.Model):
+    id = models.AutoField(primary_key=True)   # 👈 surrogate PK
+    product = models.ForeignKey(
+        Product,
+        on_delete=models.CASCADE,
+        db_column="product_id",
+        related_name="compatible_cars"   # 👈 cleaner reverse accessor
+    )
+
+    car_model = models.ForeignKey(CarModel, on_delete=models.CASCADE, db_column="model_id")
+
+    year_start = models.ForeignKey(
+        ProductYear,
+        on_delete=models.CASCADE,
+        db_column="start_year_id",
+        related_name="compatibility_start_set"   # ✅ unique
+    )
+    year_end = models.ForeignKey(
+        ProductYear,
+        on_delete=models.CASCADE,
+        db_column="end_year_id",
+        related_name="compatibility_end_set"     # ✅ unique
+    )
+
+    class Meta:
+        db_table = "product_car_compatibility"
+        managed = False
+        unique_together = ("product", "car_model", "year_start", "year_end")
+
+
 
 class Supplier(models.Model):
-    supplier_id = models.AutoField(primary_key=True, db_column='Supplier_ID')
-    name = models.CharField(max_length=255, db_column='Supplier_Name')
-    contact_number = models.CharField(max_length=50, db_column='Contact_Number')
-    address = models.CharField(max_length=255, db_column='Address')
+    supplier_id = models.AutoField(primary_key=True, db_column='supplier_id')
+    name = models.CharField(max_length=255, db_column='name')
+    contact_number = models.CharField(max_length=50, db_column='contact_number')
+    address = models.CharField(max_length=255, db_column='address')
 
     class Meta:
         db_table = 'supplier'
@@ -68,12 +138,12 @@ class Supplier(models.Model):
         return self.name
     
 class Supply(models.Model):
-    supply_id = models.AutoField(primary_key=True, db_column='Supply_ID')
-    user = models.ForeignKey('UserEmployee', on_delete=models.CASCADE, db_column='User_ID')
-    supplier = models.ForeignKey('Supplier', on_delete=models.CASCADE, db_column='Supplier_ID')
-    total_cost = models.DecimalField(max_digits=12, decimal_places=2, db_column='Total_Cost')
-    receipt_number = models.CharField(max_length=100, db_column='Receipt_Number')
-    date = models.DateField(db_column='Date')
+    supply_id = models.AutoField(primary_key=True, db_column='supply_id')
+    user = models.ForeignKey('UserEmployee', on_delete=models.CASCADE, db_column='user_id')
+    supplier = models.ForeignKey('Supplier', on_delete=models.CASCADE, db_column='supplier_id')
+    total_cost = models.DecimalField(max_digits=12, decimal_places=2, db_column='total_cost')
+    receipt_number = models.CharField(max_length=100, db_column='receipt_number')
+    date = models.DateField(db_column='date')
 
     class Meta:
         db_table = 'supply'
@@ -81,12 +151,12 @@ class Supply(models.Model):
 
 class SupplyDetails(models.Model):
     id = models.AutoField(primary_key=True)
-    supply = models.ForeignKey('Supply', on_delete=models.CASCADE, db_column='Supply_ID')
-    product = models.ForeignKey('Product', on_delete=models.CASCADE, db_column='Product_ID')
-    quantity = models.IntegerField(db_column='Quantity')
-    price = models.DecimalField(max_digits=10, decimal_places=2, db_column='Price')
-    subtotal = models.DecimalField(max_digits=12, decimal_places=2, db_column='subtotal')
-    condition = models.ForeignKey('Condition', on_delete=models.CASCADE, db_column='Condition_ID')
+    supply = models.ForeignKey('Supply', on_delete=models.CASCADE, db_column='supply_id')
+    product = models.ForeignKey('Product', on_delete=models.CASCADE, db_column='product_id')
+    quantity = models.IntegerField(db_column='quantity')
+    price = models.DecimalField(max_digits=10, decimal_places=2, db_column='price')
+    subtotal = models.DecimalField(max_digits=12, decimal_places=2, db_column='sub_total')
+    condition = models.ForeignKey('Condition', on_delete=models.CASCADE, db_column='condition_id')
 
     class Meta:
         db_table = 'supply_details'
@@ -213,44 +283,134 @@ class EmailDevice(models.Model):
     def __str__(self):
         return f"{self.email} (confirmed: {self.confirmed})"
     
+class UserCart(models.Model):
+    cart_id = models.AutoField(primary_key=True, db_column='cart_id')
+    user = models.ForeignKey('UserEmployee', on_delete=models.CASCADE, db_column='user_id')
+    product = models.ForeignKey('Product', on_delete=models.CASCADE, db_column='product_id')
+    quantity = models.IntegerField(db_column='quantity', default=1)
+    price_at_addition = models.DecimalField(max_digits=10, decimal_places=2, db_column='price_at_addition')
+    created_at = models.DateTimeField(auto_now_add=True, db_column='created_at')
+    updated_at = models.DateTimeField(auto_now=True, db_column='updated_at')
+
+    class Meta:
+        db_table = 'user_cart'
+        managed = False
+        unique_together = ('user', 'product')  # mirrors the DB constraint
+
+    def __str__(self):
+        return f"Cart item {self.product} x {self.quantity} for User {self.user}"
+    
+    
+class Region(models.Model):
+    region_id = models.AutoField(primary_key=True, db_column='region_id')
+    name = models.CharField(max_length=255, db_column='name')
+
+    class Meta:
+        db_table = 'region'
+        managed = False
+
+    def __str__(self):
+        return self.name
+
+class Province(models.Model):
+    province_id = models.AutoField(primary_key=True, db_column='province_id')
+    region = models.ForeignKey(Region, on_delete=models.CASCADE, db_column='region_id')
+    name = models.CharField(max_length=255, db_column='name')
+
+    class Meta:
+        db_table = 'province'
+        managed = False
+
+    def __str__(self):
+        return self.name
+    
+class Municipality(models.Model):
+    municipality_id = models.AutoField(primary_key=True, db_column='municipality_id')
+    province = models.ForeignKey(Province, on_delete=models.CASCADE, db_column='province_id')
+    name = models.CharField(max_length=255, db_column='name')
+    postal_code = models.CharField(max_length=255, db_column='postal_code', null=True, blank=True)
+
+    class Meta:
+        db_table = 'municipality'
+        managed = False
+
+    def __str__(self):
+        return self.name
+
+    
+class Barangay(models.Model):
+    barangay_id = models.AutoField(primary_key=True, db_column='barangay_id')
+    municipality = models.ForeignKey(Municipality, on_delete=models.CASCADE, db_column='municipality_id')
+    name = models.CharField(max_length=255, db_column='name')
+
+    class Meta:
+        db_table = 'barangay'
+        managed = False
+
+class Courier(models.Model):
+    courier_id = models.AutoField(primary_key=True)
+    name = models.CharField(max_length=100)
+    base_rate = models.DecimalField(max_digits=10, decimal_places=2)
+    rate_per_kg = models.DecimalField(max_digits=10, decimal_places=2)
+    max_weight = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    delivery_time = models.CharField(max_length=100, blank=True)
+
+    class Meta:
+        db_table = "courier"   # 👈 this tells Django to use the existing table name
+
+    def __str__(self):
+        return self.name
+
+    def calculate_shipping(self, total_weight):
+        if self.max_weight and total_weight > self.max_weight:
+            raise ValueError(f"{self.name} only allows up to {self.max_weight} kg")
+        return float(self.base_rate) + (float(self.rate_per_kg) * float(total_weight))
+
+
+    
+
+class Address(models.Model):
+    address_id = models.AutoField(primary_key=True, db_column='address_id')
+    user = models.ForeignKey('UserEmployee', on_delete=models.CASCADE, db_column='user_id', related_name='addresses')
+    street_house_building_no = models.CharField(max_length=255, db_column='street_house_building_no')
+    barangay = models.ForeignKey('Barangay', on_delete=models.SET_NULL, null=True, blank=True, db_column='barangay_id')
+    is_default = models.BooleanField(default=False, db_column='is_default')
+
+    class Meta:
+        db_table = 'address'
+        managed = False
+
+    def __str__(self):
+        return f"{self.street_house_building_no} (User {self.user_id})"
+    
 class Sale(models.Model):
-    sale_id = models.AutoField(primary_key=True, db_column='Sale_ID')
-    customer = models.ForeignKey('Customer', null=True, blank=True, on_delete=models.SET_NULL, db_column='Customer_ID')
-    user = models.ForeignKey('UserEmployee', null=True, blank=True, on_delete=models.SET_NULL, db_column='User_ID')
-    total_amount = models.IntegerField(null=True, blank=True, db_column='Total_Amount')
-    payment_type = models.CharField(max_length=255, null=True, blank=True, db_column='Payment_Type')
-    date = models.DateField(null=True, blank=True, db_column='Date')
+    sale_id = models.AutoField(primary_key=True, db_column='sale_id')
+    user = models.ForeignKey(
+        'UserEmployee',
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        db_column='user_id'
+    )
+    total_amount = models.IntegerField(null=True, blank=True, db_column='total_amount')
+    payment_type = models.CharField(max_length=255, null=True, blank=True, db_column='payment_type')
+    date = models.DateField(null=True, blank=True, db_column='date')
 
     class Meta:
         db_table = 'sale'
         managed = False  
 
     def __str__(self):
-        return f"Sale #{self.sale_id}"
-    
-    
-# Customer model
-class Customer(models.Model):
-    customer_id = models.AutoField(primary_key=True, db_column='Customer_ID')
-    customer_name = models.CharField(max_length=255, db_column='Customer_Name')
-    contact_number = models.CharField(max_length=50, db_column='Contact_Number')
-    address_id = models.IntegerField(db_column='Address_ID', null=True, blank=True)
-
-    class Meta:
-        db_table = 'customer'
-        managed = False
-
-    def __str__(self):
-        return self.customer_name
+        return f"Sale #{self.sale_id} by User {self.user_id if self.user_id else 'N/A'}"
 
 
 class SaleDetails(models.Model):
-    sale_detail_id = models.AutoField(primary_key=True, db_column='Sale_Detail_ID')
-    product = models.ForeignKey('Product', on_delete=models.CASCADE, db_column='Product_ID', null=True, blank=True)
-    quantity = models.IntegerField(db_column='Quantity', null=True, blank=True)
-    selling_price = models.IntegerField(db_column='Selling_Price', null=True, blank=True)
-    sub_total = models.IntegerField(db_column='Sub_total', null=True, blank=True)
-    sale = models.ForeignKey('Sale', on_delete=models.CASCADE, db_column='Sale_ID', null=True, blank=True)
+    sale_detail_id = models.AutoField(primary_key=True, db_column='sale_detail_id')
+    product = models.ForeignKey('Product', on_delete=models.CASCADE, db_column='product_id', null=True, blank=True)
+    quantity = models.IntegerField(db_column='quantity', null=True, blank=True)
+    selling_price = models.IntegerField(db_column='selling_price', null=True, blank=True)
+    sub_total = models.IntegerField(db_column='sub_total', null=True, blank=True)
+    sale = models.ForeignKey('Sale', on_delete=models.CASCADE, db_column='sale_id', null=True, blank=True)
 
     class Meta:
         db_table = 'sale_details'
@@ -260,3 +420,47 @@ class SaleDetails(models.Model):
         return f"SaleDetail #{self.sale_detail_id} for Sale #{self.sale.sale_id if self.sale else 'N/A'}"
     
     
+
+class Delivery(models.Model):
+    delivery_id = models.AutoField(primary_key=True, db_column='delivery_id')
+    sale = models.ForeignKey('Sale', on_delete=models.CASCADE, db_column='sale_id')
+    courier = models.ForeignKey('Courier', on_delete=models.SET_NULL, null=True, blank=True, db_column='courier_id')
+    address = models.ForeignKey('Address', on_delete=models.SET_NULL, null=True, blank=True, db_column='address_id')
+    delivery_fee = models.IntegerField(db_column='delivery_fee', default=0)
+    overall_total = models.IntegerField(db_column='overall_total', default=0)
+    date = models.DateField(db_column='date', null=True, blank=True)
+    status = models.ForeignKey('DeliveryStatus', on_delete=models.SET_NULL, null=True, blank=True, db_column='status_id')
+    tracking_number = models.CharField(max_length=255, db_column='tracking_number', null=True, blank=True)
+
+    class Meta:
+        db_table = 'delivery'
+        managed = False
+
+    def __str__(self):
+        return f"Delivery #{self.delivery_id} for Sale #{self.sale.sale_id}"
+    
+class ModePayment(models.Model):
+    payment_id = models.AutoField(primary_key=True, db_column='payment_id')
+    sale = models.ForeignKey('Sale', on_delete=models.CASCADE, db_column='sale_id')
+    merchant_id = models.IntegerField(db_column='merchant_id', null=True, blank=True)
+    ref = models.CharField(max_length=255, db_column='ref', null=True, blank=True)
+
+    class Meta:
+        db_table = 'mode_payment'
+        managed = False
+
+    def __str__(self):
+        return f"Payment #{self.payment_id} for Sale #{self.sale.sale_id}"
+
+class DeliveryStatus(models.Model):
+    status_id = models.AutoField(primary_key=True, db_column='status_id')
+    status_name = models.CharField(max_length=100, db_column='status_name')
+    description = models.TextField(db_column='description', null=True, blank=True)
+    sequence_order = models.IntegerField(db_column='sequence_order', default=0)
+
+    class Meta:
+        db_table = 'delivery_statuses'
+        managed = False
+
+    def __str__(self):
+        return self.status_name

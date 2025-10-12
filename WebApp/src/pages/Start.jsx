@@ -22,29 +22,22 @@ import oilFiltersBanner from "../assets/oil-filters-sale-banner.png";
 import Logo from "../assets/Arrival.png";
 import WebHeader from "../WebHeader.jsx";
 import Footer from "../Footer.jsx";
+import ProductGrid from "../components/ProductGrid.jsx";
+import { Car, Zap, Wrench, Droplet, Circle, HelpCircle } from "lucide-react";
+
 
 
 export default function ToyozuEcommerce() {
-  const categories = [
-    { name: "Brake Pads", icon: "🔧" },
-    { name: "Oil Filters", icon: "🛢️" },
-    { name: "Spark Plugs", icon: "⚡" },
-    { name: "Tires", icon: "🛞" },
-    { name: "Batteries", icon: "🔋" },
-    { name: "Air Filters", icon: "💨" },
-    { name: "Belts & Hoses", icon: "🔗" },
-    { name: "Suspension", icon: "🚗" },
-    { name: "Exhaust", icon: "💨" },
-    { name: "Engine Parts", icon: "🔩" },
-    { name: "Transmission", icon: "⚙️" },
-    { name: "Cooling System", icon: "❄️" },
-    { name: "Fuel System", icon: "⛽" },
-    { name: "Electrical", icon: "🔌" },
-    { name: "Body Parts", icon: "🚪" },
-    { name: "Interior", icon: "🪑" },
-    { name: "Lighting", icon: "💡" },
-    { name: "Tools", icon: "🔨" },
-  ]
+  const [categories, setCategories] = useState([]);
+  const [selectedCategory, setSelectedCategory] = useState(null);
+
+  useEffect(() => {
+    fetch("http://localhost:8000/api/categories/")
+      .then(res => res.json())
+      .then(data => setCategories(data))
+      .catch(err => console.error("❌ Failed to fetch categories:", err));
+  }, []);
+
 
   const brands = [
     { name: "Brembo", logo: bremboLogo },
@@ -60,6 +53,17 @@ export default function ToyozuEcommerce() {
     { name: "Mann Filter", logo: mannFilterLogo },
     { name: "KYB", logo: kybLogo },
   ];
+  const iconMap = {
+    "Wield Shield": "🛡️",
+    "Brake Fluid": "💧",
+    "Coolant": "🧊",
+    "Head Lights": "💡",
+    "Spark Plug": "⚡",
+    "Engine Oil": "🛢️",
+    "Brake Pad": "🛞",
+    "Air Filter": "🌬️",
+    "Fuel Filter": "⛽",
+  };
 
   const slideImages = [
     automotiveBanner,
@@ -71,6 +75,46 @@ export default function ToyozuEcommerce() {
   const [showAllCategories, setShowAllCategories] = useState(false)
   const [currentBrandSlide, setCurrentBrandSlide] = useState(0)
   const displayedCategories = showAllCategories ? categories : categories.slice(0, 10)
+  const [carMakes, setCarMakes] = useState([]);
+  const [carModels, setCarModels] = useState([]);
+  const [years, setYears] = useState([]);
+
+  const [selectedMake, setSelectedMake] = useState("");
+  const [selectedModel, setSelectedModel] = useState("");
+  const [selectedYear, setSelectedYear] = useState("");
+
+
+
+  // Fetch car makes
+  useEffect(() => {
+    fetch("http://127.0.0.1:8000/api/cars/")
+      .then(res => res.json())
+      .then(data => setCarMakes(data));
+  }, []);
+
+  // Fetch car models
+  useEffect(() => {
+    fetch("http://127.0.0.1:8000/api/car-models/")
+      .then(res => res.json())
+      .then(data => setCarModels(data));
+  }, []);
+
+  // Fetch years
+  useEffect(() => {
+    fetch("http://127.0.0.1:8000/api/years/")
+      .then(res => res.json())
+      .then(data => setYears(data));
+  }, []);
+
+  const handleSearch = () => {
+  fetch(`/api/products/?car_model=${selectedModel}&year=${selectedYear}`)
+    .then(res => res.json())
+    .then(data => {
+      console.log("✅ Compatible products:", data);
+      // Show results in UI
+    });
+  };
+
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -174,44 +218,30 @@ export default function ToyozuEcommerce() {
           <div className="w-24 h-1 bg-gradient-to-r from-[#eb0505] to-red-400 mx-auto mt-4 rounded-full"></div>
         </div>
         
-        <div className=" p-8">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            
-            {/* Year Model Select */}
-            <div className="space-y-2">
-              <label className="block text-sm font-semibold text-gray-700 mb-2">
-                Year Model
-              </label>
-              <div className="relative">
-                <select className="w-full border-2 border-gray-200 rounded-lg p-3 bg-white text-gray-700 focus:border-[#eb0505] focus:ring-2 focus:ring-red-100 transition-all duration-200 appearance-none cursor-pointer hover:border-red-300">
-                  <option value="" className="text-gray-500">Select Year Model</option>
-                  <option value="2024">2024</option>
-                  <option value="2023">2023</option>
-                  <option value="2022">2022</option>
-                  <option value="2021">2021</option>
-                  <option value="2020">2020</option>
-                </select>
-                <div className="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
-                  <svg className="w-5 h-5 text-[#eb0505]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path>
-                  </svg>
-                </div>
-              </div>
-            </div>
-
+        <div className=" p-8 flex flex-col justify-center items-center">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 ml-[166px]">
             {/* Car Brand Select */}
             <div className="space-y-2">
               <label className="block text-sm font-semibold text-gray-700 mb-2">
                 Car Brand
               </label>
               <div className="relative">
-                <select className="w-full border-2 border-gray-200 rounded-lg p-3 bg-white text-gray-700 focus:border-[#eb0505] focus:ring-2 focus:ring-red-100 transition-all duration-200 appearance-none cursor-pointer hover:border-red-300">
-                  <option value="" className="text-gray-500">Select Brand</option>
-                  <option value="toyota">Toyota</option>
-                  <option value="ford">Ford</option>
-                  <option value="honda">Honda</option>
-                  <option value="nissan">Nissan</option>
-                  <option value="mazda">Mazda</option>
+                <select
+                  value={selectedMake}
+                  onChange={(e) => {
+                    setSelectedMake(e.target.value);
+                    setSelectedModel(""); // reset model when brand changes
+                  }}
+                  className="w-full border-2 border-gray-200 rounded-lg p-3 bg-white text-gray-700 
+                            focus:border-[#eb0505] focus:ring-2 focus:ring-red-100 transition-all 
+                            duration-200 appearance-none cursor-pointer hover:border-red-300"
+                >
+                  <option value="">Select Brand</option>
+                  {carMakes.map((make) => (
+                    <option key={make.car_id} value={make.car_id}>
+                      {make.make}
+                    </option>
+                  ))}
                 </select>
                 <div className="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
                   <svg className="w-5 h-5 text-[#eb0505]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -227,13 +257,22 @@ export default function ToyozuEcommerce() {
                 Car Model
               </label>
               <div className="relative">
-                <select className="w-full border-2 border-gray-200 rounded-lg p-3 bg-white text-gray-700 focus:border-[#eb0505] focus:ring-2 focus:ring-red-100 transition-all duration-200 appearance-none cursor-pointer hover:border-red-300">
-                  <option value="" className="text-gray-500">Select Model</option>
-                  <option value="hilux">Hilux</option>
-                  <option value="fortuner">Fortuner</option>
-                  <option value="raptor">Raptor</option>
-                  <option value="ranger">Ranger</option>
-                  <option value="civic">Civic</option>
+                <select
+                  value={selectedModel}
+                  onChange={(e) => setSelectedModel(e.target.value)}
+                  disabled={!selectedMake}
+                  className="w-full border-2 border-gray-200 rounded-lg p-3 bg-white text-gray-700 
+                            focus:border-[#eb0505] focus:ring-2 focus:ring-red-100 transition-all 
+                            duration-200 appearance-none cursor-pointer hover:border-red-300"
+                >
+                  <option value="">Select Model</option>
+                  {carModels
+                    .filter((m) => String(m.car_id) === String(selectedMake))
+                    .map((model) => (
+                      <option key={model.model_id} value={model.model_id}>
+                        {model.model_name}
+                      </option>
+                    ))}
                 </select>
                 <div className="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
                   <svg className="w-5 h-5 text-[#eb0505]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -243,19 +282,26 @@ export default function ToyozuEcommerce() {
               </div>
             </div>
 
-            {/* Car Variants Select */}
+            {/* Year Model Select */}
             <div className="space-y-2">
               <label className="block text-sm font-semibold text-gray-700 mb-2">
-                Car Variants
+                Year Model
               </label>
               <div className="relative">
-                <select className="w-full border-2 border-gray-200 rounded-lg p-3 bg-white text-gray-700 focus:border-[#eb0505] focus:ring-2 focus:ring-red-100 transition-all duration-200 appearance-none cursor-pointer hover:border-red-300">
-                  <option value="" className="text-gray-500">Select Variant</option>
-                  <option value="2.4L">2.4L Manual</option>
-                  <option value="2.8L">2.8L Automatic</option>
-                  <option value="3.0L">3.0L Diesel</option>
-                  <option value="hybrid">Hybrid</option>
-                  <option value="electric">Electric</option>
+                <select
+                  value={selectedYear}
+                  onChange={(e) => setSelectedYear(e.target.value)}
+                  disabled={!selectedModel}
+                  className="w-full border-2 border-gray-200 rounded-lg p-3 bg-white text-gray-700 
+                            focus:border-[#eb0505] focus:ring-2 focus:ring-red-100 transition-all 
+                            duration-200 appearance-none cursor-pointer hover:border-red-300"
+                >
+                  <option value="">Select Year</option>
+                  {years.map((y) => (
+                    <option key={y.year_id} value={y.year}>
+                      {y.year}
+                    </option>
+                  ))}
                 </select>
                 <div className="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
                   <svg className="w-5 h-5 text-[#eb0505]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -264,12 +310,11 @@ export default function ToyozuEcommerce() {
                 </div>
               </div>
             </div>
-
           </div>
 
           {/* Search Button */}
           <div className="flex justify-center mt-8">
-            <button className="bg-gradient-to-r from-[#eb0505] to-red-600 text-white px-8 py-3 rounded-lg font-semibold hover:from-red-600 hover:to-red-700 transform hover:scale-105 transition-all duration-200 shadow-lg hover:shadow-xl flex items-center space-x-2">
+            <button onClick={handleSearch} className="bg-gradient-to-r from-[#eb0505] to-red-600 text-white px-8 py-3 rounded-lg font-semibold hover:from-red-600 hover:to-red-700 transform hover:scale-105 transition-all duration-200 shadow-lg hover:shadow-xl flex items-center space-x-2">
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
               </svg>
@@ -295,22 +340,29 @@ export default function ToyozuEcommerce() {
             <h2 className="text-2xl font-bold text-[#eb0505]">CATEGORIES</h2>
           </div>
 
+          
           <div className="grid grid-cols-5 gap-4">
-            {displayedCategories.map((category, i) => (
-              <button
-                key={i}
-                className="bg-[#eb0505] text-white px-4 py-3 rounded-lg flex items-center space-x-2 font-medium hover:bg-[#d10404] hover:scale-105 transition-all duration-200 hover:shadow-lg transform"
-                style={{
-                  animation: `fadeInUp 0.4s ease-out ${i * 0.05}s both`,
-                }}
-              >
-                <div className="w-6 h-6 bg-white rounded flex items-center justify-center text-xs">
-                  {category.icon}
-                </div>
-                <span className="text-sm">{category.name}</span>
-              </button>
-            ))}
+            {categories.map((category, i) => {
+              const icon = iconMap[category.name] || "📦"; // default fallback
+
+              return (
+                <Link
+                  key={category.id}
+                  to={`/products?category=${encodeURIComponent(category.name)}`}
+                  className="bg-[#eb0505] text-white px-4 py-3 rounded-lg flex items-center space-x-2 font-medium hover:bg-[#d10404] hover:scale-105 transition-all duration-200 hover:shadow-lg transform"
+                  style={{ animation: `fadeInUp 0.4s ease-out ${i * 0.05}s both` }}
+                >
+                  <div className="w-6 h-6 bg-white rounded flex items-center justify-center text-lg">
+                    {/* render emoji as text */}
+                    <span>{icon}</span>
+                  </div>
+                  <span className="text-sm">{category.name}</span>
+                </Link>
+              );
+            })}
           </div>
+
+
 
           <div className="text-center mt-6">
             <button
@@ -376,19 +428,9 @@ export default function ToyozuEcommerce() {
       <section className="py-12 px-4">
         <div className="max-w-6xl mx-auto">
           <h2 className="text-2xl font-bold text-[#eb0505] text-center mb-8">Discovery</h2>
+          <ProductGrid />
 
-          <div className="grid grid-cols-4 gap-4">
-            {Array.from({ length: 12 }).map((_, i) => (
-              <div key={i} className="border border-[#eb0505] rounded-lg p-4">
-                <div className="w-full h-32 bg-[#d9d9d9] rounded mb-3"></div>
-                <h3 className="text-sm font-medium text-black mb-2">Brembo Brake Pad 3402-Hilux, Fortuner, Raptor</h3>
-                <div className="flex items-center mb-2">
-                  <div className="flex text-[#ffcb45]">{"★".repeat(5)}</div>
-                </div>
-                <p className="text-[#eb0505] text-sm font-medium">Sold 4000+</p>
-              </div>
-            ))}
-          </div>
+      
 
           <div className="text-center mt-8">
             <button className="bg-[#eb0505] text-white px-8 py-2 rounded-full font-semibold">More</button>

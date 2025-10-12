@@ -1,19 +1,34 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from "react"
-import WebHeader from "../WebHeader"
+import { useState, useEffect } from "react";
+import WebHeader from "../WebHeader";
 import axios from "axios";
+import AddressSection from "../components/AddressSection.jsx";
+import OrderHistory from "../components/OrderHistory.jsx";
 
 export default function AccountDashboard() {
   const [user, setUser] = useState(null);
   const [file, setFile] = useState(null);
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
-  const [activeTab, setActiveTab] = useState("tracking")
-  const [selectedOrders, setSelectedOrders] = useState([])
+  const [activeTab, setActiveTab] = useState("tracking");
+  const [orders, setOrders] = useState([]);
+  const [addresses, setAddresses] = useState([]);
+  const [selectedOrders, setSelectedOrders] = useState([]);
 
 
-  // Helper: get token from localStorage
+
+  const API_BASE = "http://localhost:8000/api";
+  const userId = user?.id || user?.user_id;
+
+  const sidebarItems = [
+    { id: "tracking", label: "Order Tracking", icon: "🚚" },
+    { id: "profile", label: "User Details", icon: "👤" },
+    { id: "addresses", label: "My Addresses", icon: "📍" },
+    { id: "orders", label: "Order History", icon: "📦" },
+    { id: "vouchers", label: "Vouchers", icon: "🎫" },
+  ];
+
   const getAuthHeaders = () => {
     const token = localStorage.getItem("access_token");
     return {
@@ -21,11 +36,11 @@ export default function AccountDashboard() {
     };
   };
 
-  // Fetch current user profile
+  // ✅ Fetch profile
   useEffect(() => {
     const fetchProfile = async () => {
       try {
-        const res = await axios.get("http://localhost:8000/api/profile/me/", {
+        const res = await axios.get(`${API_BASE}/profile/me/`, {
           headers: getAuthHeaders(),
         });
         setUser(res.data);
@@ -38,7 +53,37 @@ export default function AccountDashboard() {
     fetchProfile();
   }, []);
 
-  // Handle file upload
+  // ✅ Fetch addresses
+  useEffect(() => {
+    const fetchAddresses = async () => {
+      try {
+        const res = await axios.get(`${API_BASE}/addresses/`, {
+          headers: getAuthHeaders(),
+        });
+        setAddresses(res.data);
+      } catch (err) {
+        console.error("Error fetching addresses:", err);
+      }
+    };
+    fetchAddresses();
+  }, []);
+
+  // ✅ Fetch orders
+  useEffect(() => {
+    const fetchOrders = async () => {
+      try {
+        const res = await axios.get(`${API_BASE}/orders/`, {
+          headers: getAuthHeaders(),
+        });
+        setOrders(res.data);
+      } catch (err) {
+        console.error("Error fetching orders:", err);
+      }
+    };
+    fetchOrders();
+  }, []);
+
+  // ✅ Upload profile image
   const handleUpload = async () => {
     if (!file) {
       alert("Please select a file first.");
@@ -50,101 +95,22 @@ export default function AccountDashboard() {
 
     try {
       setUploading(true);
-      const token = localStorage.getItem("access_token");
-
-      await axios.post("http://localhost:8000/api/profile/upload/", formData, {
+      const res = await axios.post(`${API_BASE}/profile/upload/`, formData, {
         headers: {
           "Content-Type": "multipart/form-data",
-          Authorization: `Bearer ${token}`,
+          ...getAuthHeaders(),
         },
-      });
-
-      // Refresh profile after upload
-      const res = await axios.get("http://localhost:8000/api/profile/me/", {
-        headers: { Authorization: `Bearer ${token}` },
       });
       setUser(res.data);
     } catch (err) {
       console.error("Upload failed:", err);
-      alert("Upload failed. Check console for details.");
     } finally {
       setUploading(false);
     }
   };
 
-
-  if (loading) {
-    return <p className="text-center text-gray-600">Loading profile...</p>;
-  }
-
-  if (!user) {
-    return <p className="text-center text-red-600">No user data found.</p>;
-  }
-
-
-  const sidebarItems = [
-    { id: "tracking", label: "Order Tracking", icon: "🚚" },
-    { id: "profile", label: "User Details", icon: "👤" },
-    { id: "addresses", label: "My Addresses", icon: "📍" },
-    { id: "orders", label: "Order History", icon: "📦" },
-    { id: "vouchers", label: "Vouchers", icon: "🎫" },
-  ]
-
-  const orders = [
-    {
-      id: "ORD-001",
-      date: "2024-01-15",
-      status: "Delivered",
-      total: "$89.99",
-      items: 3,
-      trackingNumber: "TRK123456789",
-    },
-    {
-      id: "ORD-002",
-      date: "2024-01-12",
-      status: "In Transit",
-      total: "$156.50",
-      items: 2,
-      trackingNumber: "TRK987654321",
-    },
-    {
-      id: "ORD-003",
-      date: "2024-01-10",
-      status: "Processing",
-      total: "$45.00",
-      items: 1,
-      trackingNumber: "TRK456789123",
-    },
-    {
-      id: "ORD-004",
-      date: "2024-01-08",
-      status: "Pending",
-      total: "$234.99",
-      items: 4,
-      trackingNumber: "TRK789123456",
-    },
-  ]
-
-  const addresses = [
-    {
-      id: 1,
-      type: "Home",
-      name: "John Doe",
-      address: "123 Main St, Apt 4B",
-      city: "New York, NY 10001",
-      phone: "+1 (555) 123-4567",
-      isDefault: true,
-    },
-    {
-      id: 2,
-      type: "Work",
-      name: "John Doe",
-      address: "456 Business Ave, Suite 200",
-      city: "New York, NY 10002",
-      phone: "+1 (555) 987-6543",
-      isDefault: false,
-    },
-  ]
+  if (loading) return <p className="text-center text-gray-600">Loading profile...</p>;
+  if (!user) return <p className="text-center text-red-600">No user data found.</p>;
 
   const renderContent = () => {
     switch (activeTab) {
@@ -232,6 +198,7 @@ export default function AccountDashboard() {
                   </div>
                 ))}
             </div>
+            <OrderHistory userId={userId} />
           </div>
         )
 
@@ -265,6 +232,10 @@ export default function AccountDashboard() {
                   <p className="text-gray-600">Email: {user.email || "—"}</p>
                   <p className="text-gray-600">Username: {user.username || "—"}</p>
                   <p className="text-gray-600">Phone: {user.mobile_phone || "—"}</p>
+                  <p className="text-gray-600 font-bold">
+                    Role: {user.role_id || "—"}
+                  </p>
+
                 </div>
               </div>
 
@@ -288,58 +259,13 @@ export default function AccountDashboard() {
 
       case "addresses":
         return (
-          <div className="space-y-6">
-            <div className="text-center mb-8">
-              <h2 className="text-3xl font-bold text-red-600 mb-2">My Addresses</h2>
-              <p className="text-gray-600">Manage your delivery addresses</p>
-            </div>
+          <AddressSection />
 
-            <div className="max-w-4xl mx-auto">
-              <div className="flex justify-end mb-6">
-                <button className="px-6 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 font-medium">
-                  + Add New Address
-                </button>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {addresses.map((address) => (
-                  <div key={address.id} className="bg-white p-6 rounded-lg shadow-sm border relative">
-                    {address.isDefault && (
-                      <span className="absolute top-4 right-4 px-3 py-1 bg-red-100 text-red-800 text-xs rounded-full font-medium">
-                        Default
-                      </span>
-                    )}
-                    <div className="mb-4">
-                      <h3 className="text-lg font-semibold text-gray-900 mb-1">{address.type}</h3>
-                      <p className="text-gray-700 font-medium">{address.name}</p>
-                    </div>
-                    <div className="space-y-2 text-gray-600">
-                      <p>{address.address}</p>
-                      <p>{address.city}</p>
-                      <p>{address.phone}</p>
-                    </div>
-                    <div className="mt-6 flex gap-3">
-                      <button className="px-4 py-2 text-red-600 border border-red-600 rounded-lg hover:bg-red-50 text-sm font-medium">
-                        Edit
-                      </button>
-                      <button className="px-4 py-2 text-gray-600 border border-gray-300 rounded-lg hover:bg-gray-50 text-sm font-medium">
-                        Delete
-                      </button>
-                      {!address.isDefault && (
-                        <button className="px-4 py-2 text-red-600 border border-red-600 rounded-lg hover:bg-red-50 text-sm font-medium">
-                          Set Default
-                        </button>
-                      )}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
         )
 
       case "orders":
         return (
+          
           <div className="space-y-6">
             <div className="flex items-center justify-between">
               <h2 className="text-2xl font-bold">Order History</h2>

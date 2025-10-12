@@ -1,59 +1,69 @@
 "use client"
 
-import { useState } from "react"
-import { getCurrentUser, hasPermission, PERMISSIONS } from "../lib/auth"
+import { useState, useEffect } from "react"
+import { Navigate } from "react-router-dom"
 import WebHeader from "../WebHeader"
+import axios from "axios";
+import UploadForm from "../components/UploadForm";
+import ProductTable from "../components/ProductTable";
+import OrderSection from "../components/OrderSection";
+
+// Map numeric role_Id → permissions
+const ROLE_PERMISSIONS = {
+  1: ["VIEW_ANALYTICS", "VIEW_ORDERS", "MANAGE_PRODUCTS", "MANAGE_INVENTORY", "MANAGE_EMPLOYEES", "EDIT_PROFILE"], // Admin
+  2: ["VIEW_ANALYTICS", "VIEW_ORDERS", "MANAGE_PRODUCTS", "MANAGE_INVENTORY", "EDIT_PROFILE"], // Secretary
+  3: ["MANAGE_PRODUCTS", "MANAGE_INVENTORY", "EDIT_PROFILE"], // Employee
+  4: ["VIEW_ORDERS", "EDIT_PROFILE"], // Customer
+}
+
+function hasPermission(roleType, permission) {
+  return ROLE_PERMISSIONS[roleType]?.includes(permission) || false
+}
 
 export default function AdminDashboard() {
-  const [currentUser] = useState(getCurrentUser())
+  const [roleType, setRoleType] = useState(null)
   const [activeSection, setActiveSection] = useState("overview")
 
+  useEffect(() => {
+    const storedRole = localStorage.getItem("role_id"); // ✅ consistent
+    if (storedRole) {
+      setRoleType(parseInt(storedRole, 10));
+    }
+  }, []);
+
+
+
+  if (roleType !== 1) {
+    return <Navigate to="/AdminDashboard" replace />;
+  }
+
+  if (roleType === null) {
+    return <div>Loading...</div>;
+  }
+
+  if (roleType !== 1) {
+    return <Navigate to="/unauthorized" replace />;
+  }
+
+
+
   const navigationItems = [
-    {
-      id: "overview",
-      label: "Overview",
-      icon: "📊",
-      permission: PERMISSIONS.VIEW_ANALYTICS,
-    },
-    {
-      id: "orders",
-      label: "Order Management",
-      icon: "📦",
-      permission: PERMISSIONS.VIEW_ORDERS,
-    },
-    {
-      id: "products",
-      label: "Product Management",
-      icon: "🔧",
-      permission: PERMISSIONS.MANAGE_PRODUCTS,
-    },
-    {
-      id: "inventory",
-      label: "Inventory",
-      icon: "📋",
-      permission: PERMISSIONS.MANAGE_INVENTORY,
-    },
-    {
-      id: "employees",
-      label: "Employee Management",
-      icon: "👥",
-      permission: PERMISSIONS.MANAGE_EMPLOYEES,
-    },
-    {
-      id: "profile",
-      label: "Profile Settings",
-      icon: "⚙️",
-      permission: PERMISSIONS.EDIT_PROFILE,
-    },
+    { id: "overview", label: "Overview", icon: "📊", permission: "VIEW_ANALYTICS" },
+    { id: "orders", label: "Order Management", icon: "📦", permission: "VIEW_ORDERS" },
+    { id: "products", label: "Product Management", icon: "🔧", permission: "MANAGE_PRODUCTS" },
+    { id: "inventory", label: "Inventory", icon: "📋", permission: "MANAGE_INVENTORY" },
+    { id: "employees", label: "Employee Management", icon: "👥", permission: "MANAGE_EMPLOYEES" },
+    { id: "profile", label: "Profile Settings", icon: "⚙️", permission: "EDIT_PROFILE" },
   ]
 
-  const filteredNavigation = navigationItems.filter((item) => hasPermission(currentUser.role, item.permission))
+  const filteredNavigation = navigationItems.filter((item) =>
+    hasPermission(roleType, item.permission)
+  )
 
   return (
     <div className="min-h-screen bg-pink-50">
       {/* Header */}
-      <WebHeader currentUser={currentUser} />
-      
+      <WebHeader />
 
       <div className="flex">
         {/* Sidebar */}
@@ -64,7 +74,9 @@ export default function AdminDashboard() {
                 key={item.id}
                 onClick={() => setActiveSection(item.id)}
                 className={`w-full flex items-center space-x-3 px-3 py-2 rounded-lg text-left transition-colors ${
-                  activeSection === item.id ? "bg-red-600 text-white" : "text-gray-700 hover:bg-gray-100"
+                  activeSection === item.id
+                    ? "bg-red-600 text-white"
+                    : "text-gray-700 hover:bg-gray-100"
                 }`}
               >
                 <span className="text-lg">{item.icon}</span>
@@ -76,27 +88,580 @@ export default function AdminDashboard() {
 
         {/* Main Content */}
         <main className="flex-1 p-6">
-          {activeSection === "overview" && hasPermission(currentUser.role, PERMISSIONS.VIEW_ANALYTICS) && (
-            <OverviewSection />
-          )}
-          {activeSection === "orders" && hasPermission(currentUser.role, PERMISSIONS.VIEW_ORDERS) && <OrdersSection />}
-          {activeSection === "products" && hasPermission(currentUser.role, PERMISSIONS.MANAGE_PRODUCTS) && (
-            <ProductsSection />
-          )}
-          {activeSection === "inventory" && hasPermission(currentUser.role, PERMISSIONS.MANAGE_INVENTORY) && (
-            <InventorySection />
-          )}
-          {activeSection === "employees" && hasPermission(currentUser.role, PERMISSIONS.MANAGE_EMPLOYEES) && (
-            <EmployeesSection />
-          )}
-          {activeSection === "profile" && hasPermission(currentUser.role, PERMISSIONS.EDIT_PROFILE) && (
-            <ProfileSection currentUser={currentUser} />
-          )}
+          {activeSection === "overview" && <OverviewSection />}
+          {activeSection === "orders" && <OrderSection />}
+          {activeSection === "products" && <ProductsSection />}
+          {activeSection === "inventory" && <InventorySection />}
+          {activeSection === "employees" && <EmployeesSection />}
+          {activeSection === "profile" && <ProfileSection roleType={roleType} />}
         </main>
       </div>
     </div>
   )
 }
+
+function ProductsSection() {
+  const [suppliers, setSuppliers] = useState([]);
+  const [brands, setBrands] = useState([]);
+  const [categories, setCategories] = useState([]);
+  const [conditions, setConditions] = useState([]);
+  const token = localStorage.getItem("access_token");
+
+  const [showAddForm, setShowAddForm] = useState(false);
+  const [receiptData, setReceiptData] = useState({
+    receiptNumber: `RCP-${Date.now().toString().slice(-6)}`,
+    supplierId: "",
+    date: new Date().toISOString().split("T")[0],
+    items: [
+      {
+        productName: "",
+        brandId: "",
+        categoryId: "",
+        conditionId: "",
+        purchase_price: "",
+        selling_price: "",
+        quantity: "",
+        subtotal: 0,
+        files: [],
+      },
+    ],
+  });
+
+  // -----------------------------
+  // Helpers
+  // -----------------------------
+  const addProductLine = () => {
+    setReceiptData((prev) => ({
+      ...prev,
+      items: [
+        ...prev.items,
+        {
+          productName: "",
+          brandId: "",
+          categoryId: "",
+          conditionId: "",
+          purchase_price: "",
+          selling_price: "",
+          quantity: "",
+          subtotal: 0,
+          files: [],
+        },
+      ],
+    }));
+  };
+
+  const removeProductLine = (index) => {
+    setReceiptData((prev) => ({
+      ...prev,
+      items: prev.items.filter((_, i) => i !== index),
+    }));
+  };
+
+  const updateProductLine = (index, field, value) => {
+    setReceiptData((prev) => {
+      const newItems = [...prev.items];
+      if (["brandId", "categoryId", "conditionId"].includes(field)) {
+        newItems[index][field] = value; // always string!
+      } else if (["purchase_price", "selling_price"].includes(field)) {
+        newItems[index][field] = value ? value : "";
+      } else if (field === "files") {
+        newItems[index][field] = value;
+      } else {
+        newItems[index][field] = value;
+      }
+      // Auto-calc subtotal
+      const unitPrice = parseFloat(newItems[index].purchase_price) || 0;
+      const qty = parseInt(newItems[index].quantity) || 0;
+      newItems[index].subtotal = unitPrice * qty;
+      return { ...prev, items: newItems };
+    });
+  };
+
+  const calculateTotal = () => {
+    return receiptData.items
+      .reduce((total, item) => total + (item.subtotal || 0), 0)
+      .toFixed(2);
+  };
+
+  const resetForm = () => {
+    setShowAddForm(false);
+    setReceiptData({
+      receiptNumber: `RCP-${Date.now().toString().slice(-6)}`,
+      supplierId: "",
+      date: new Date().toISOString().split("T")[0],
+      items: [
+        {
+          productName: "",
+          brandId: "",
+          categoryId: "",
+          conditionId: "",
+          purchase_price: "",
+          selling_price: "",
+          quantity: "",
+          subtotal: 0,
+          files: [],
+        },
+      ],
+    });
+  };
+
+  // -----------------------------
+  // API Calls
+  // -----------------------------
+  useEffect(() => {
+    if (showAddForm) {
+      axios
+        .get("http://localhost:8000/api/suppliers/", {
+          headers: { Authorization: `Bearer ${token}` },
+        })
+        .then((res) => setSuppliers(res.data));
+
+      axios
+        .get("http://localhost:8000/api/brands/", {
+          headers: { Authorization: `Bearer ${token}` },
+        })
+        .then((res) => setBrands(res.data));
+
+      axios
+        .get("http://localhost:8000/api/categories/", {
+          headers: { Authorization: `Bearer ${token}` },
+        })
+        .then((res) => setCategories(res.data));
+
+      axios
+        .get("http://localhost:8000/api/conditions/", {
+          headers: { Authorization: `Bearer ${token}` },
+        })
+        .then((res) => setConditions(res.data));
+    }
+  }, [showAddForm, token]);
+
+  // -----------------------------
+  // Confirm Receipt Flow
+  const handleConfirmReceipt = async (e) => {
+    e.preventDefault();
+
+    try {
+      for (const item of receiptData.items) {
+        const productData = {
+          name: item.productName,
+          brand_id: item.brandId ? parseInt(item.brandId, 10) : null,
+          category_id: item.categoryId ? parseInt(item.categoryId, 10) : null,
+          condition_id: item.conditionId ? parseInt(item.conditionId, 10) : null,
+          purchase_price: item.purchase_price ? parseFloat(item.purchase_price) : null,
+          selling_price: item.selling_price ? parseFloat(item.selling_price) : null,
+          quantity: item.quantity ? parseInt(item.quantity, 10) : 0,
+        };
+
+        console.log("DEBUG: Access token:", token);
+        console.log("DEBUG: Supplier list:", suppliers);
+        console.log("DEBUG: Receipt Data:", receiptData);
+
+        const productRes = await axios.post(
+          "http://localhost:8000/api/products/",
+          productData,
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+        const productId = productRes.data.product_id;
+
+
+        if (item.files && item.files.length > 0) {
+          const formData = new FormData();
+          Array.from(item.files).forEach((file) =>
+            formData.append("images", file)
+          );
+          await axios.post(
+            `http://localhost:8000/api/products/${productId}/upload-images/`,
+            formData,
+            {
+              headers: {
+                Authorization: `Bearer ${token}`,
+                "Content-Type": "multipart/form-data",
+              },
+            }
+          );
+        }
+      }
+
+      // ---- THIS BLOCK IS THE FIX ----
+      // Find the supplier name from supplierId
+      const supplierName =
+        suppliers.find(s => String(s.supplier_id) === receiptData.supplierId)?.name || "";
+
+      // Build items array with unitPrice
+      const items = receiptData.items.map(item => ({
+        productName: item.productName,
+        quantity: item.quantity,
+        unitPrice: item.purchase_price, // Backend expects unitPrice!
+      }));
+
+      // Build payload for receipt
+      const receiptPayload = {
+        receiptNumber: receiptData.receiptNumber,
+        supplierName, // Backend expects supplierName!
+        date: receiptData.date,
+        items,
+      };
+
+      console.log("Receipt payload:", receiptPayload); // Debug
+
+      await axios.post(
+        "http://localhost:8000/api/supply-receipts/",
+        receiptPayload,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+      console.log("✅ Product(s), images, and receipt saved.");
+      resetForm();
+    } catch (err) {
+      console.error("❌ Error:", err.response?.data || err.message);
+    }
+  };
+  // -----------------------------
+  // Add Supplier / Brand / Category
+  // -----------------------------
+  const handleAddSupplier = () => {
+    const name = prompt("Enter supplier name:");
+    if (!name) return;
+
+    const contact = prompt("Enter contact number:");
+    if (!contact) return;
+
+    const address = prompt("Enter address:");
+    if (!address) return;
+
+    axios
+      .post(
+        "http://localhost:8000/api/suppliers/",
+        { name, contact_number: contact, address },
+        { headers: { Authorization: `Bearer ${token}` } }
+      )
+      .then(() => {
+        axios
+          .get("http://localhost:8000/api/suppliers/", {
+            headers: { Authorization: `Bearer ${token}` },
+          })
+          .then((res) => setSuppliers(res.data));
+      });
+  };
+
+  const handleAddBrand = () => {
+    const name = prompt("Enter brand name:");
+    if (!name) return;
+
+    const description = prompt("Enter brand description (optional):");
+
+    axios
+      .post(
+        "http://localhost:8000/api/brands/",
+        { name, description: description || null },
+        { headers: { Authorization: `Bearer ${token}` } }
+      )
+      .then(() =>
+        axios
+          .get("http://localhost:8000/api/brands/", {
+            headers: { Authorization: `Bearer ${token}` },
+          })
+          .then((res) => setBrands(res.data))
+      );
+  };
+
+  const handleAddCategory = () => {
+    const name = prompt("Enter category name:");
+    if (!name) return;
+
+    const description = prompt("Enter category description (optional):");
+
+    axios
+      .post(
+        "http://localhost:8000/api/categories/",
+        { name, description: description || null },
+        { headers: { Authorization: `Bearer ${token}` } }
+      )
+      .then(() =>
+        axios
+          .get("http://localhost:8000/api/categories/", {
+            headers: { Authorization: `Bearer ${token}` },
+          })
+          .then((res) => setCategories(res.data))
+      );
+  };
+
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <h2 className="text-2xl font-bold text-gray-900">Product Management</h2>
+        <button
+          onClick={() => setShowAddForm(true)}
+          className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors"
+        >
+          Add Product
+        </button>
+      </div>
+      {showAddForm && (
+        <div className="bg-white p-8 rounded-lg border-2 border-gray-300 shadow-lg max-w-8xl mx-auto">
+          {/* Receipt Header */}
+          <div className="text-center border-b-2 border-gray-300 pb-4 mb-6">
+            <h3 className="text-2xl font-bold text-gray-900 mb-1">SUPPLIER RECEIPT</h3>
+            <p className="text-sm text-gray-600">Product Inventory Form</p>
+          </div>
+
+          <form onSubmit={handleConfirmReceipt} className="space-y-6">
+            {/* Receipt Info */}
+            <div className="grid grid-cols-3 gap-4 pb-4 border-b border-gray-200">
+              <div>
+                <label className="block text-xs font-semibold text-gray-700 mb-1 uppercase">Receipt Number</label>
+                <input
+                  type="text"
+                  value={receiptData.receiptNumber}
+                  readOnly
+                  className="w-full bg-gray-100 border border-gray-300 rounded px-3 py-2 text-sm text-gray-900 font-mono"
+                />
+              </div>
+              <div className="relative">
+                <label className="block text-xs font-semibold text-gray-700 mb-1 uppercase">Supplier</label>
+                <div className="flex items-center space-x-2">
+                  <select
+                    value={receiptData.supplierId}
+                    onChange={(e) => setReceiptData({ ...receiptData, supplierId: e.target.value })}
+                    className="w-full bg-white border border-gray-300 rounded px-3 py-2 text-sm text-gray-900 focus:ring-2 focus:ring-red-500 focus:border-red-500"
+                    required
+                  >
+                    <option value="">Select Supplier</option>
+                    {suppliers.map((s) => (
+                      <option key={s.supplier_id} value={String(s.supplier_id)}>
+                        {s.name}
+                      </option>
+                    ))}
+                  </select>
+                  <button
+                    type="button"
+                    onClick={handleAddSupplier}
+                    className="text-red-600 hover:text-red-700 text-lg font-bold px-2"
+                    title="Add Supplier"
+                  >
+                    +
+                  </button>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-gray-700 mb-1 uppercase">Date</label>
+                <input
+                  type="date"
+                  value={receiptData.date}
+                  onChange={(e) => setReceiptData({ ...receiptData, date: e.target.value })}
+                  className="w-full bg-white border border-gray-300 rounded px-3 py-2 text-sm text-gray-900 focus:ring-2 focus:ring-red-500 focus:border-red-500"
+                  required
+                />
+              </div>
+            </div>
+            {/* Product Lines */}
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <h4 className="text-sm font-bold text-gray-900 uppercase">Product Details</h4>
+                <button
+                  type="button"
+                  onClick={addProductLine}
+                  className="text-sm bg-gray-200 text-gray-800 px-3 py-1 rounded hover:bg-gray-300 transition-colors"
+                >
+                  + Add Product Line
+                </button>
+              </div>
+              {/* Table Header */}
+              <div className="grid grid-cols-16 gap-2 text-xs font-semibold text-gray-700 uppercase border-b border-gray-300 pb-2">
+                <div className="col-span-3">Product Name</div>
+                <div className="col-span-2">Brand</div>
+                <div className="col-span-2">Category</div>
+                <div className="col-span-2">Condition</div>
+                <div className="col-span-2">Unit Price</div>
+                <div className="col-span-2">Selling Price</div>
+                <div className="col-span-1">Quantity</div>
+                <div className="col-span-1">Subtotal</div>
+                <div className="col-span-1"></div>
+              </div>
+              {/* Product Rows */}
+              <div className="space-y-3 max-h-96 overflow-y-auto">
+                {receiptData.items.map((item, index) => (
+                  <div key={index} className="space-y-2 border-b pb-4">
+                    <div className="grid grid-cols-16 gap-4 items-center">
+                      {/* Product Name */}
+                      <input
+                        type="text"
+                        placeholder="Product name"
+                        value={item.productName}
+                        onChange={(e) => updateProductLine(index, "productName", e.target.value)}
+                        className="col-span-3 border rounded px-2 py-2 text-sm"
+                        required
+                      />
+                      {/* Brand */}
+                      <div className="col-span-2 flex items-center space-x-2">
+                        {console.log("Brands array:", brands)}
+                        <select
+                          value={item.brandId}
+                          onChange={e => {
+                            console.log(`Brand select changed for item ${index} :`, e.target.value);
+                            updateProductLine(index, "brandId", e.target.value);
+                          }}
+                        >
+                          <option value="">Select Brand</option>
+                          {brands.map((b, i) => {
+                            // Try id, then brand_id, then fallback to index
+                            const id = b.id ?? b.brand_id ?? `brand-${i}`;
+                            return (
+                              <option key={id} value={String(id)}>
+                                {b.name || `Brand #${i}`}
+                              </option>
+                            );
+                          })}
+                        </select>
+                        <button
+                          type="button"
+                          onClick={handleAddBrand}
+                          className="text-red-600 hover:text-red-700 text-lg font-bold px-2"
+                        >
+                          +
+                        </button>
+                      </div>
+                      {/* Category */}
+                      <div className="col-span-2 flex items-center space-x-1">
+                        <select
+                          value={item.categoryId}
+                          onChange={e => {
+                            console.log(`Category select changed for item ${index} :`, e.target.value);
+                            updateProductLine(index, "categoryId", e.target.value);
+                          }}
+                        >
+                          <option value="">Select Category</option>
+                          {categories.map((c, i) => (
+                            <option
+                              key={c.category_id ? String(c.category_id) : `cat-${i}`}
+                              value={c.category_id ? String(c.category_id) : ""}
+                            >
+                              {c.name || `Category #${i}`}
+                            </option>
+                          ))}
+                        </select>
+                        <button
+                          type="button"
+                          onClick={handleAddCategory}
+                          className="text-red-600 hover:text-red-700 text-lg font-bold px-2"
+                        >
+                          +
+                        </button>
+                      </div>
+                      {/* Condition */}
+                      <div className="col-span-2">
+                        <select
+                          value={item.conditionId}
+                          onChange={e => {
+                            console.log(`Condition select changed for item ${index} :`, e.target.value);
+                            updateProductLine(index, "conditionId", e.target.value);
+                          }}
+                        >
+                          <option value="">Select Condition</option>
+                          {conditions.map((cond, i) => (
+                            <option
+                              key={cond.condition_id ? String(cond.condition_id) : `cond-${i}`}
+                              value={cond.condition_id ? String(cond.condition_id) : ""}
+                            >
+                              {cond.name || `Condition #${i}`}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                      {/* Purchase Price */}
+                      <input
+                        type="number"
+                        step="0.01"
+                        placeholder="Purchase Price"
+                        value={item.purchase_price}
+                        onChange={(e) => updateProductLine(index, "purchase_price", e.target.value)}
+                        className="col-span-2 border rounded px-2 py-2 text-sm"
+                        required
+                      />
+                      {/* Selling Price */}
+                      <input
+                        type="number"
+                        step="0.01"
+                        placeholder="Selling Price"
+                        value={item.selling_price}
+                        onChange={(e) => updateProductLine(index, "selling_price", e.target.value)}
+                        className="col-span-2 border rounded px-2 py-2 text-sm"
+                        required
+                      />
+                      {/* Quantity */}
+                      <input
+                        type="number"
+                        placeholder="0"
+                        value={item.quantity}
+                        onChange={(e) => updateProductLine(index, "quantity", e.target.value)}
+                        className="col-span-1 border rounded px-2 py-2 text-sm"
+                        required
+                      />
+                      {/* Subtotal */}
+                      <div className="col-span-1 text-sm font-semibold">
+                        ₱{item.subtotal.toFixed(2)}
+                      </div>
+                      {/* Remove line */}
+                      <div className="col-span-1 flex justify-end">
+                        {receiptData.items.length > 1 && (
+                          <button
+                            type="button"
+                            onClick={() => removeProductLine(index)}
+                            className="text-red-500 hover:text-red-700 text-sm"
+                          >
+                            ✕
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                    {/* Upload Form */}
+                    <div className="mt-2 ml-2 col-span-4">
+                      <div className="text-xs font-semibold text-gray-700 uppercase mb-1">
+                        Upload Photo
+                      </div>
+                      <UploadForm
+                        files={item.files || []}
+                        setFiles={(newFiles) => updateProductLine(index, "files", newFiles)}
+                      />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+            {/* Total Section */}
+            <div className="border-t-2 border-gray-300 pt-4 space-y-2">
+              <div className="flex justify-end items-center">
+                <span className="text-lg font-bold text-gray-900 mr-4">TOTAL:</span>
+                <span className="text-2xl font-bold text-red-600">₱{calculateTotal()}</span>
+              </div>
+            </div>
+            {/* Action Buttons */}
+            <div className="flex justify-end space-x-3 pt-4 border-t border-gray-200">
+              <button
+                type="button"
+                onClick={resetForm}
+                className="bg-gray-200 text-gray-800 px-6 py-2 rounded-lg hover:bg-gray-300 transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                className="bg-red-600 text-white px-6 py-2 rounded-lg hover:bg-red-700 transition-colors font-semibold"
+              >
+                Confirm Receipt
+              </button>
+            </div>
+          </form>
+        </div>
+      )}
+      {/* Product Table */}
+      <ProductTable />
+    </div>
+  );
+}
+
 
 // Overview Section Component
 function OverviewSection() {
@@ -150,7 +715,7 @@ function OverviewSection() {
 }
 
 // Orders Section Component
-function OrdersSection() {
+function OrdersSection1() {
   const orders = [
     { id: "#1247", customer: "John Doe", total: "$89.99", status: "Processing", date: "2024-01-15" },
     { id: "#1246", customer: "Jane Smith", total: "$156.50", status: "Shipped", date: "2024-01-14" },
@@ -211,148 +776,6 @@ function OrdersSection() {
   )
 }
 
-// Products Section Component
-function ProductsSection() {
-  const [products, setProducts] = useState([
-    { id: 1, name: "Brake Pads Premium", category: "Brakes", price: "$89.99", stock: 45 },
-    { id: 2, name: "Oil Filter Standard", category: "Filters", price: "$24.99", stock: 5 },
-    { id: 3, name: "Spark Plugs Set", category: "Engine", price: "$34.99", stock: 78 },
-  ])
-
-  const [showAddForm, setShowAddForm] = useState(false)
-  const [newProduct, setNewProduct] = useState({
-    name: "",
-    category: "",
-    price: "",
-    stock: "",
-  })
-
-  const handleAddProduct = (e) => {
-    e.preventDefault()
-    const product = {
-      id: products.length + 1,
-      ...newProduct,
-      price: `$${newProduct.price}`,
-      stock: Number.parseInt(newProduct.stock),
-    }
-    setProducts([...products, product])
-    setNewProduct({ name: "", category: "", price: "", stock: "" })
-    setShowAddForm(false)
-  }
-
-  return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-bold text-gray-900">Product Management</h2>
-        <button
-          onClick={() => setShowAddForm(true)}
-          className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors"
-        >
-          Add Product
-        </button>
-      </div>
-
-      {showAddForm && (
-        <div className="bg-white p-6 rounded-lg border border-gray-200 shadow-sm">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Add New Product</h3>
-          <form onSubmit={handleAddProduct} className="grid grid-cols-2 gap-4">
-            <input
-              type="text"
-              placeholder="Product Name"
-              value={newProduct.name}
-              onChange={(e) => setNewProduct({ ...newProduct, name: e.target.value })}
-              className="bg-white border border-gray-300 rounded-lg px-3 py-2 text-gray-900 focus:ring-2 focus:ring-red-500 focus:border-red-500"
-              required
-            />
-            <input
-              type="text"
-              placeholder="Category"
-              value={newProduct.category}
-              onChange={(e) => setNewProduct({ ...newProduct, category: e.target.value })}
-              className="bg-white border border-gray-300 rounded-lg px-3 py-2 text-gray-900 focus:ring-2 focus:ring-red-500 focus:border-red-500"
-              required
-            />
-            <input
-              type="number"
-              placeholder="Price (without $)"
-              value={newProduct.price}
-              onChange={(e) => setNewProduct({ ...newProduct, price: e.target.value })}
-              className="bg-white border border-gray-300 rounded-lg px-3 py-2 text-gray-900 focus:ring-2 focus:ring-red-500 focus:border-red-500"
-              required
-            />
-            <input
-              type="number"
-              placeholder="Stock Quantity"
-              value={newProduct.stock}
-              onChange={(e) => setNewProduct({ ...newProduct, stock: e.target.value })}
-              className="bg-white border border-gray-300 rounded-lg px-3 py-2 text-gray-900 focus:ring-2 focus:ring-red-500 focus:border-red-500"
-              required
-            />
-            <div className="col-span-2 flex space-x-2">
-              <button
-                type="submit"
-                className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors"
-              >
-                Add Product
-              </button>
-              <button
-                type="button"
-                onClick={() => setShowAddForm(false)}
-                className="bg-gray-200 text-gray-800 px-4 py-2 rounded-lg hover:bg-gray-300 transition-colors"
-              >
-                Cancel
-              </button>
-            </div>
-          </form>
-        </div>
-      )}
-
-      <div className="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Product Name
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Category
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Price
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Stock
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Actions
-                </th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-200">
-              {products.map((product) => (
-                <tr key={product.id} className="hover:bg-gray-50">
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{product.name}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{product.category}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{product.price}</td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <span className={`text-sm ${product.stock < 10 ? "text-red-500" : "text-gray-900"}`}>
-                      {product.stock}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm">
-                    <button className="text-red-600 hover:text-red-800 mr-3">Edit</button>
-                    <button className="text-red-500 hover:text-red-400">Delete</button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-  )
-}
 
 // Inventory Section Component
 function InventorySection() {

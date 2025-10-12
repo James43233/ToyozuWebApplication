@@ -1,10 +1,18 @@
-import React from "react";
+import React, { useContext } from "react";
 import { Navigate } from "react-router-dom";
+import { AuthContext } from "../Context/AuthContext";
 
-export default function ProtectedRoute({ children }) {
-  const accessToken = localStorage.getItem("access_token");
-  if (!accessToken) {
-    return <Navigate to="/" replace />;
+export default function ProtectedRoute({ children, requiredRole }) {
+  const storedRole = localStorage.getItem("role_id");
+  const roleId = storedRole ? parseInt(storedRole, 10) : null;
+
+  if (!storedRole) {
+    return <Navigate to="/LoginPage" replace />;
   }
+
+  if (requiredRole && roleId !== requiredRole) {
+    return <Navigate to="/unauthorized" replace />;
+  }
+
   return children;
 }
