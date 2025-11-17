@@ -52,6 +52,8 @@ urlpatterns = [
     path('api/deliveries/<int:pk>/', views.delivery_detail, name='delivery_detail'),
     path('api/deliveries/', views.list_deliveries, name='list_deliveries'),
     path('api/delivery-statuses/', views.list_delivery_statuses, name='list_delivery_statuses'),
+    path("api/users/", UserListView.as_view(), name="user-list"),
+    path("api/users/<int:pk>/", UserDetailView.as_view(), name="user-detail"),
 
 ]
 

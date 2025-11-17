@@ -3,10 +3,9 @@ from django.db import connection, transaction
 from rest_framework import generics, permissions
 from .models import *
 
-
 class UserEmployeeSerializer(serializers.ModelSerializer):
     role_id = serializers.IntegerField(source="role.role_id", read_only=True)
-    role_name = serializers.CharField(source="role.name", read_only=True)  # 👈 safe
+    role_name = serializers.CharField(source="role.title", read_only=True)
 
     class Meta:
         model = UserEmployee
@@ -17,11 +16,9 @@ class UserEmployeeSerializer(serializers.ModelSerializer):
             "email",
             "mobile_phone",
             "role_id",
-            "role_name",        # 👈 now valid because we defined it above
+            "role_name",
             "profile_picture",
         ]
-
-        
 
         
 class BrandSerializer(serializers.ModelSerializer):

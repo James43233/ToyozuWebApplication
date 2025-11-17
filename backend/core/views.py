@@ -303,10 +303,33 @@ class RegisterEmployeeView(APIView):
     def post(self, request):
         serializer = UserEmployeeSerializer(data=request.data)
         if serializer.is_valid():
-            serializer.save()
-            return Response({'detail': 'Employee registered!'}, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            role = RoleType.objects.filter(role_id=4).first()
+            if not role:
+                return Response(
+                    {"detail": "Default role with ID 4 not found."},
+                    status=status.HTTP_500_INTERNAL_SERVER_ERROR
+                )
 
+            # Get the password
+            raw_password = request.data.get('password')
+
+            # Create user instance
+            user = UserEmployee(
+                user_name=serializer.validated_data.get('user_name'),
+                username=serializer.validated_data.get('username'),
+                email=serializer.validated_data.get('email'),
+                mobile_phone=serializer.validated_data.get('mobile_phone'),
+                contact_type='email',
+                role=role,
+            )
+
+            # ✅ Securely hash password using Django’s password hasher
+            user.set_password(raw_password)
+            user.save()
+
+            return Response({'detail': 'User registered successfully!'}, status=status.HTTP_201_CREATED)
+
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class LowStockProductsView(APIView):
@@ -879,3 +902,23 @@ def list_delivery_statuses(request):
     statuses = DeliveryStatus.objects.order_by("sequence_order")
     serializer = DeliveryStatusSerializer(statuses, many=True)
     return Response(serializer.data)
+
+
+class UserListView(APIView):
+    def get(self, request):
+        users = UserEmployee.objects.all()
+        serializer = UserEmployeeSerializer(users, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    
+class UserDetailView(generics.RetrieveUpdateAPIView):  # 👈 this enables PATCH /api/users/<id>/
+    queryset = UserEmployee.objects.all()
+    serializer_class = UserEmployeeSerializer
+
+    def patch(self, request, *args, **kwargs):
+        user = self.get_object()
+        role_id = request.data.get("role_id")
+        if role_id:
+            user.role_id = role_id
+            user.save(update_fields=["role_id"])
+            return Response({"message": "Role updated successfully!"}, status=status.HTTP_200_OK)
+        return Response({"error": "role_id is required"}, status=status.HTTP_400_BAD_REQUEST)
