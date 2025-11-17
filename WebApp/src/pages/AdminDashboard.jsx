@@ -7,6 +7,8 @@ import axios from "axios";
 import UploadForm from "../components/UploadForm";
 import ProductTable from "../components/ProductTable";
 import OrderSection from "../components/OrderSection";
+import EmployeesSection from "../components/Employeesection";
+import InventorySection from "../components/InventorySection";
 
 // Map numeric role_Id → permissions
 const ROLE_PERMISSIONS = {
@@ -714,135 +716,10 @@ function OverviewSection() {
   )
 }
 
-// Orders Section Component
-function OrdersSection1() {
-  const orders = [
-    { id: "#1247", customer: "John Doe", total: "$89.99", status: "Processing", date: "2024-01-15" },
-    { id: "#1246", customer: "Jane Smith", total: "$156.50", status: "Shipped", date: "2024-01-14" },
-    { id: "#1245", customer: "Bob Johnson", total: "$234.75", status: "Delivered", date: "2024-01-13" },
-  ]
 
-  return (
-    <div className="space-y-6">
-      <h2 className="text-2xl font-bold text-gray-900">Order Management</h2>
-
-      <div className="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Order ID
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Customer
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Total
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Status
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-200">
-              {orders.map((order) => (
-                <tr key={order.id} className="hover:bg-gray-50">
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{order.id}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{order.customer}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{order.total}</td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <span
-                      className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                        order.status === "Processing"
-                          ? "bg-yellow-100 text-yellow-800"
-                          : order.status === "Shipped"
-                            ? "bg-blue-100 text-blue-800"
-                            : "bg-green-100 text-green-800"
-                      }`}
-                    >
-                      {order.status}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{order.date}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-  )
-}
-
-
-// Inventory Section Component
-function InventorySection() {
-  return (
-    <div className="space-y-6">
-      <h2 className="text-2xl font-bold text-gray-900">Inventory Management</h2>
-
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="bg-white p-6 rounded-lg border border-gray-200 shadow-sm">
-          <h3 className="text-lg font-semibold text-gray-900 mb-2">Low Stock Alert</h3>
-          <p className="text-3xl font-bold text-red-500">23</p>
-          <p className="text-sm text-gray-600">Items need restocking</p>
-        </div>
-
-        <div className="bg-white p-6 rounded-lg border border-gray-200 shadow-sm">
-          <h3 className="text-lg font-semibold text-gray-900 mb-2">Total Products</h3>
-          <p className="text-3xl font-bold text-gray-900">342</p>
-          <p className="text-sm text-gray-600">In inventory</p>
-        </div>
-
-        <div className="bg-white p-6 rounded-lg border border-gray-200 shadow-sm">
-          <h3 className="text-lg font-semibold text-gray-900 mb-2">Inventory Value</h3>
-          <p className="text-3xl font-bold text-gray-900">$45,678</p>
-          <p className="text-sm text-gray-600">Total stock value</p>
-        </div>
-      </div>
-
-      <div className="bg-white p-6 rounded-lg border border-gray-200 shadow-sm">
-        <h3 className="text-lg font-semibold text-gray-900 mb-4">Stock Movements</h3>
-        <div className="space-y-3">
-          {[
-            { action: "Stock Added", product: "Brake Pads Premium", quantity: "+50", time: "2 hours ago" },
-            { action: "Stock Sold", product: "Oil Filter Standard", quantity: "-15", time: "4 hours ago" },
-            { action: "Stock Added", product: "Spark Plugs Set", quantity: "+25", time: "1 day ago" },
-          ].map((movement, index) => (
-            <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-              <div className="flex items-center space-x-3">
-                <div
-                  className={`w-3 h-3 rounded-full ${
-                    movement.action === "Stock Added" ? "bg-green-500" : "bg-red-500"
-                  }`}
-                ></div>
-                <div>
-                  <p className="text-sm font-medium text-gray-900">{movement.action}</p>
-                  <p className="text-xs text-gray-600">{movement.product}</p>
-                </div>
-              </div>
-              <div className="text-right">
-                <p
-                  className={`text-sm font-medium ${
-                    movement.quantity.startsWith("+") ? "text-green-500" : "text-red-500"
-                  }`}
-                >
-                  {movement.quantity}
-                </p>
-                <p className="text-xs text-gray-600">{movement.time}</p>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-    </div>
-  )
-}
 
 // Employees Section Component (Admin only)
-function EmployeesSection() {
+function EmployeesSection1() {
   const employees = [
     { id: 1, name: "John Admin", email: "admin@toyozu.com", role: "Admin", status: "Active" },
     { id: 2, name: "Sarah Secretary", email: "secretary@toyozu.com", role: "Secretary", status: "Active" },

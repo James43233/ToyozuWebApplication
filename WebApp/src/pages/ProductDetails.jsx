@@ -1,6 +1,14 @@
 "use client";
 
-import { ShoppingCart, Minus, Plus, Heart, Truck, Shield, RotateCcw } from "lucide-react";
+import {
+  ShoppingCart,
+  Minus,
+  Plus,
+  Heart,
+  Truck,
+  Shield,
+  RotateCcw,
+} from "lucide-react";
 import { useState, useEffect } from "react";
 import WebHeader from "../WebHeader.jsx";
 import WebFooter from "../Footer.jsx";
@@ -73,16 +81,23 @@ export default function ProductDetail() {
     console.log("📦 Payload being sent:", payload);
 
     try {
-      const response = await axios.post("http://localhost:8000/api/cart/", payload, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
+      const response = await axios.post(
+        "http://localhost:8000/api/cart/",
+        payload,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
         },
-      });
+      );
       console.log("✅ Added successfully:", response.data);
       toast.success("Added to cart!");
     } catch (error) {
-      console.error("❌ Error adding to cart:", error.response?.data || error.message);
+      console.error(
+        "❌ Error adding to cart:",
+        error.response?.data || error.message,
+      );
       toast.error("Failed to add to cart");
     }
   };
@@ -95,7 +110,7 @@ export default function ProductDetail() {
     <div className="min-h-screen bg-gradient-to-br from-red-100 via-white to-red-100">
       <WebHeader />
       {/* Breadcrumb Navigator */}
-      <div className="max-w-6xl mx-auto px-4 mt-4 mb-4">
+      <div className="w-[1300px] mx-auto px-4 mt-4 mb-4">
         <nav className="text-sm text-gray-600" aria-label="Breadcrumb">
           <ol className="flex items-center space-x-2">
             <li>
@@ -111,18 +126,14 @@ export default function ProductDetail() {
             </li>
             <li className="text-gray-500">›</li>
             <li>
-              <span className="text-gray-800 font-medium">
-                {product.name}
-              </span>
+              <span className="text-gray-800 font-medium">{product.name}</span>
             </li>
           </ol>
         </nav>
       </div>
 
-
-      <div className="max-w-6xl mx-auto px-4">
+      <div className="w-[1300px] mx-auto px-4">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 bg-white p-4 rounded-lg shadow-sm">
-          
           <div className="space-y-4">
             {/* Main Image */}
             <div className="relative overflow-hidden rounded-lg flex items-center justify-center w-[500px] h-[400px] ">
@@ -144,7 +155,7 @@ export default function ProductDetail() {
               {product.images?.slice(0, 4).map((img, index) => {
                 // If this is the 4th thumbnail and there are more images, show "+N"
                 if (index === 4 && product.images.length > 5) {
-                  const remaining = product.images.length - 5
+                  const remaining = product.images.length - 5;
                   return (
                     <button
                       key={img.id}
@@ -160,7 +171,7 @@ export default function ProductDetail() {
                         +{remaining}
                       </div>
                     </button>
-                  )
+                  );
                 }
 
                 // Normal thumbnail
@@ -169,7 +180,9 @@ export default function ProductDetail() {
                     key={img.id}
                     onClick={() => setSelectedImage(index)}
                     className={`border-2 rounded-lg overflow-hidden w-[100px] h-[100px] ${
-                      selectedImage === index ? "border-[#eb0505]" : "border-gray-200"
+                      selectedImage === index
+                        ? "border-[#eb0505]"
+                        : "border-gray-200"
                     }`}
                   >
                     <img
@@ -178,16 +191,17 @@ export default function ProductDetail() {
                       className="w-full h-full object-cover"
                     />
                   </button>
-                )
+                );
               })}
             </div>
           </div>
 
-
           {/* Product Info */}
           <div className="space-y-6">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900 mb-2">{product.name}</h1>
+              <h1 className="text-3xl font-bold text-gray-900 mb-2">
+                {product.name}
+              </h1>
               <p className="text-sm text-gray-600 mb-2">
                 {product.brand_name} • {product.category_name}
               </p>
@@ -211,11 +225,15 @@ export default function ProductDetail() {
                 <span className="text-xs text-gray-600">
                   {product.rating || 0} ({product.reviews || 0})
                 </span>
-              </div>             
+              </div>
 
               <div className="flex items-center space-x-4 mb-4">
-                <span className="text-3xl font-bold text-[#eb0505]">₱{product.selling_price}</span>
-                <span className="text-green-600 font-medium">✓ In Stock ({product.quantity} available)</span>
+                <span className="text-3xl font-bold text-[#eb0505]">
+                  ₱{product.selling_price}
+                </span>
+                <span className="text-green-600 font-medium">
+                  ✓ In Stock ({product.quantity} available)
+                </span>
               </div>
             </div>
 
@@ -240,7 +258,9 @@ export default function ProductDetail() {
                     <Plus className="w-4 h-4" />
                   </button>
                 </div>
-                <span className="text-gray-600">Max: {product.quantity} pieces</span>
+                <span className="text-gray-600">
+                  Max: {product.quantity} pieces
+                </span>
               </div>
             </div>
 
@@ -277,7 +297,6 @@ export default function ProductDetail() {
           </div>
         </div>
 
-
         {/* Product Details Tabs */}
         <div className="mt-16 bg-white p-8 rounded-lg shadow-sm">
           <nav className="flex space-x-8">
@@ -299,7 +318,9 @@ export default function ProductDetail() {
           <div className="py-8 bg-white rounded-lg">
             {activeTab === "description" && (
               <div className="prose max-w-none">
-                <h3 className="text-xl font-semibold mb-4">Product Description</h3>
+                <h3 className="text-xl font-semibold mb-4">
+                  Product Description
+                </h3>
                 <p className="text-gray-700 mb-4">
                   {product.description || "No description available."}
                 </p>
@@ -308,7 +329,9 @@ export default function ProductDetail() {
 
             {activeTab === "specifications" && (
               <div>
-                <h3 className="text-xl font-semibold mb-4">Technical Specifications</h3>
+                <h3 className="text-xl font-semibold mb-4">
+                  Technical Specifications
+                </h3>
                 <div className="grid grid-cols-2 gap-8">
                   {/* Left column */}
                   <div className="space-y-3">
@@ -324,38 +347,38 @@ export default function ProductDetail() {
                       <span className="font-medium">Condition:</span>
                       <span>{product.condition_item || "-"}</span>
                     </div>
-                     {/* Stock */}
+                    {/* Stock */}
                     <div className="flex justify-between py-2 border-b">
                       <span className="font-medium">Stock:</span>
                       <span>{product.quantity}</span>
                     </div>
-            
                   </div>
 
                   {/* Right column */}
                   <div className="space-y-3">
                     {/* Compatibility list */}
                     <div className="py-2 border-b">
-                     <span className="font-medium block mb-1">Compatible Vehicles:</span>
-                      {product.compatible_cars && product.compatible_cars.length > 0 ? (
+                      <span className="font-medium block mb-1">
+                        Compatible Vehicles:
+                      </span>
+                      {product.compatible_cars &&
+                      product.compatible_cars.length > 0 ? (
                         <ul className="list-disc list-inside space-y-1">
                           {product.compatible_cars.map((c, i) => (
                             <li key={`compat-${i}`}>
-                              {c.car_model.car_make} {c.car_model.model_name} ({c.year_start.year} – {c.year_end.year})
+                              {c.car_model.car_make} {c.car_model.model_name} (
+                              {c.year_start.year} – {c.year_end.year})
                             </li>
                           ))}
                         </ul>
                       ) : (
                         <span>-</span>
                       )}
-
                     </div>
                   </div>
                 </div>
               </div>
             )}
-
-
           </div>
         </div>
 
@@ -366,22 +389,16 @@ export default function ProductDetail() {
         </div>
 
         {/* Related Products */}
-        <section className="py-12 px-4">
-          <div className="max-w-6xl mx-auto">
-            <h2 className="text-2xl font-bold text-[#eb0505] text-start mb-8">
+        <section className="">
+          <div className="w-[1300px]">
+            <h2 className="text-2xl font-bold text-[#eb0505] text-justify mb-[20px]">
               Related Products
             </h2>
             <ProductGrid />
-            <div className="text-center mt-8">
-              <button className="bg-[#eb0505] text-white px-8 py-2 rounded-full font-semibold">
-                More
-              </button>
-            </div>
           </div>
         </section>
-
       </div>
       <WebFooter />
     </div>
-  )
+  );
 }

@@ -56,7 +56,7 @@ function Register() {
 
       if (response.ok) {
         alert("Registration successful: " + text)
-        navigate("/login")
+        navigate("/Start")
       } else {
         alert("Registration failed: " + (json ? JSON.stringify(json) : text))
       }

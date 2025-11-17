@@ -145,34 +145,32 @@ export default function ProductTable() {
         <table className="min-w-full text-sm text-left text-gray-700">
           <thead className="bg-gray-100 text-xs uppercase font-semibold text-gray-600 border-b border-gray-300">
             <tr>
-              <th className="px-4 py-2">Product Name</th>
+              <th className="px-4 py-2">Product</th>
               <th className="px-4 py-2">Brand</th>
               <th className="px-4 py-2">Category</th>
-              <th className="px-4 py-2">Condition</th>
-              <th className="px-4 py-2">Supplier</th>
-              <th className="px-4 py-2">Supply Date</th>
-              <th className="px-4 py-2">Purchase Price</th>
-              <th className="px-4 py-2">Selling Price</th>
-              <th className="px-4 py-2">Quantity</th>
+              <th className="px-4 py-2">Price</th>
+              <th className="px-4 py-2">Qty</th>
               <th className="px-4 py-2">Actions</th>
             </tr>
           </thead>
+
           <tbody className="divide-y divide-gray-200">
             {products.map((product) => (
               <tr key={product.product_id} className="hover:bg-gray-50 transition-colors">
-                <td className="px-4 py-2 font-medium text-gray-900">{product.name}</td>
-                <td>{product.brand_name}</td>
-                <td>{product.category_name}</td>
-                <td>{product.condition_item || '-'}</td>
-                <td>{product.supplier_name || '-'}</td>
-                <td>{product.supply_date || '-'}</td>
-                <td className="px-4 py-2 text-red-600 font-semibold">
-                  ₱{Number(product.purchase_price).toFixed(2)}
+                <td className="px-4 py-2 font-medium text-gray-900">
+                  {product.name}
                 </td>
+
+                <td className="px-4 py-2">{product.brand_name}</td>
+
+                <td className="px-4 py-2">{product.category_name}</td>
+
                 <td className="px-4 py-2 text-green-600 font-semibold">
                   ₱{Number(product.selling_price).toFixed(2)}
                 </td>
+
                 <td className="px-4 py-2">{product.quantity}</td>
+
                 <td className="px-4 py-2 space-x-2">
                   <button
                     className="bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700"
@@ -180,21 +178,24 @@ export default function ProductTable() {
                   >
                     Upload Photo
                   </button>
+
                   <button
                     className="bg-yellow-500 text-white px-3 py-1 rounded hover:bg-yellow-600"
                     onClick={() => {
                       setEditProductId(product.product_id);
+
                       setFormData({
                         name: product.name || "",
                         description: product.description || "",
-                        brand: product.brand_id || "", // depends on your API — might be product.brand or product.brand_id
+                        brand: product.brand_id || "",
                         category: product.category_id || "",
                         purchase_price: product.purchase_price || "",
                         selling_price: product.selling_price || "",
                         quantity: product.quantity || "",
                         weight: product.weight || 0.5,
-                        compatibilities: product.compatibilities || []
+                        compatibilities: product.compatibilities || [],
                       });
+
                       console.log("🧩 Product data:", product);
                     }}
                   >
@@ -209,7 +210,7 @@ export default function ProductTable() {
 
       {/* Modal for Image Upload */}
       {activeProductId && (
-        <div className="fixed inset-0 z-40 flex items-center justify-center bg-black bg-opacity-50">
+        <div className="fixed inset-0 z-40 flex items-center justify-center bg-black/30 backdrop-blur-sm">
           <div className="bg-white rounded-lg p-6 shadow-xl w-full max-w-md relative">
             <button
               className="absolute top-2 right-2 text-gray-500 hover:text-gray-900"
@@ -226,7 +227,7 @@ export default function ProductTable() {
 
       {/* Modal for Quick Update */}
       {editProductId && (
-        <div className="fixed inset-0 z-40 flex items-center justify-center bg-black bg-opacity-50">
+        <div className="fixed inset-0 z-40 flex items-center justify-center bg-black/30 backdrop-blur-sm">
           <div className="bg-white rounded-lg p-6 shadow-xl w-full max-w-2xl relative">
             <button
               className="absolute top-2 right-2 text-gray-500 hover:text-gray-900"

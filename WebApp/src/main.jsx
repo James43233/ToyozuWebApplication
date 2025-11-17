@@ -28,6 +28,8 @@ import CheckoutPage from './pages/CheckOutPage.jsx';
 import PlaceOrder from './components/PlaceOrder.jsx';
 import OrderHistory from './components/OrderHistory.jsx';
 import OrderSection from './components/OrderSection.jsx';
+import AllProducts from "./pages/AllProducts.jsx";
+
 
 
 const router = createBrowserRouter([
@@ -38,6 +40,8 @@ const router = createBrowserRouter([
   { path: "/ProductNavi", element: <ProductNavi /> },
   { path: "/ProductFiltered", element: <ProductFiltered /> },
   { path: "/PlaceOrder", element: <PlaceOrder /> },
+  { path: "/AllProducts", element: <AllProducts /> },
+  
 
 
   {
@@ -190,6 +194,7 @@ const router = createBrowserRouter([
       </ProtectedRoute>
     ),
   }
+
 
 
 

@@ -1,5 +1,4 @@
-
-import { useState } from "react"
+import { useState } from "react";
 
 export default function ProductNavi() {
   const categories = [
@@ -27,12 +26,12 @@ export default function ProductNavi() {
     "Monroe",
     "KYB",
   ];
-    const [filters, setFilters] = useState({
-      priceRange: [0, 1000],
-      rating: 0,
-      categories: [],
-      brands: [],
-    })
+  const [filters, setFilters] = useState({
+    priceRange: [0, 1000],
+    rating: 0,
+    categories: [],
+    brands: [],
+  });
 
   const toggleCategory = (category) => {
     setFilters((prev) => ({
@@ -54,7 +53,7 @@ export default function ProductNavi() {
 
   return (
     // Sticky Sidebar Filters
-    <aside className="w-64 flex-shrink-0">
+    <aside className="w-[230px] flex-shrink-0 ">
       <div className="sticky top-24 space-y-6">
         {/* Price Range Filter */}
         <div className="bg-white p-6 rounded-lg shadow-sm border">

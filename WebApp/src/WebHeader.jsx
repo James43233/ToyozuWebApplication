@@ -63,16 +63,17 @@ function WebHeader() {
 
       {/* Right Side */}
       <div className="flex items-center space-x-6 relative justify-center flex-1 gap-10 ">
-        {/* Cart with item count badge */}
-        <div className="relative">
-          <ShoppingCart
-            className="w-6 h-6 text-gray-700 cursor-pointer hover:text-red-600 transition"
-            onClick={() => navigate("/Cart-demo")}
-          />
-          <span className="absolute -bottom-1 -right-2 bg-red-600 text-white text-xs font-semibold rounded-full w-4 h-4 flex items-center justify-center">
-            {cartCount || 0}
-          </span>
-        </div>
+        {isLoggedIn && (
+          <div className="relative">
+            <ShoppingCart
+              className="w-6 h-6 text-gray-700 cursor-pointer hover:text-red-600 transition"
+              onClick={() => navigate("/Cart-demo")}
+            />
+            <span className="absolute -bottom-1 -right-2 bg-red-600 text-white text-xs font-semibold rounded-full w-4 h-4 flex items-center justify-center">
+              {cartCount || 0}
+            </span>
+          </div>
+        )}
 
         {/* User Menu */}
         {isLoggedIn ? (
