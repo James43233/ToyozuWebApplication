@@ -7,7 +7,7 @@ export default function ProtectedRoute({ children, requiredRole }) {
   const roleId = storedRole ? parseInt(storedRole, 10) : null;
 
   if (!storedRole) {
-    return <Navigate to="/LoginPage" replace />;
+    return <Navigate to="/login-page" replace />;
   }
 
   if (requiredRole && roleId !== requiredRole) {

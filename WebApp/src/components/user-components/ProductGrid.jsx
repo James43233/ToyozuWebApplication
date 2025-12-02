@@ -147,7 +147,7 @@ export default function ProductGrid() {
       {/* More Button */}
       {visibleCount < products.length && (
         <Link
-          to="/AllProducts" // 👈 This route will go to your full product list page
+          to="/all-products" // 👈 This route will go to your full product list page
           className="bg-[#ffdad4] text-white px-8 py-2 rounded-full font-semibold hover:bg-[#5a261f] transition mt-[20px] max-w-[100px] flex items-center justify-center mx-auto mb-[40px]"
         >
           More

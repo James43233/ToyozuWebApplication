@@ -27,27 +27,24 @@ export default function AdminDashboard() {
   const [activeSection, setActiveSection] = useState("overview")
 
   useEffect(() => {
-    const storedRole = localStorage.getItem("role_id"); // ✅ consistent
+    const storedRole = localStorage.getItem("role_id");
     if (storedRole) {
       setRoleType(parseInt(storedRole, 10));
+    } else {
+      // explicitly set to a non-null value if absent so we can redirect
+      setRoleType(undefined);
     }
   }, []);
 
-
-
-  if (roleType !== 1) {
-    return <Navigate to="/AdminDashboard" replace />;
-  }
-
+  // WAIT for roleType to be known before deciding where to redirect.
   if (roleType === null) {
     return <div>Loading...</div>;
   }
 
+  // If user is not an admin (role 1) redirect to unauthorized.
   if (roleType !== 1) {
     return <Navigate to="/unauthorized" replace />;
   }
-
-
 
   const navigationItems = [
     { id: "overview", label: "Overview", icon: "📊", permission: "VIEW_ANALYTICS" },

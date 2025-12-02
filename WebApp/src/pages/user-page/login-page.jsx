@@ -128,8 +128,8 @@ export default function LoginPage() {
   // --- REDIRECT BASED ON ROLE ---
   const redirectByRole = (roleId) => {
     const id = parseInt(roleId, 10)
-    if (id === 1) navigate("/AdminDashboard")
-    else navigate("/Start")
+    if (id === 1) navigate("/admin-dashboard")
+    else navigate("/")
   }
 
   console.log("Saved role_id:", localStorage.getItem("role_id"))
@@ -234,7 +234,7 @@ export default function LoginPage() {
                 <div className="mt-8 text-center mb-8">
                     <p className="text-muted-foreground">
                     Don't have an account?{" "}
-                    <a href="#" className="text-primary hover:text-accent font-medium transition-colors">
+                    <a href="/register" className="text-primary hover:text-accent font-medium transition-colors">
                         Sign up here
                     </a>
                     </p>
