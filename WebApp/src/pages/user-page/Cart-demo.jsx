@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import axios from "axios";
-import ShoppingCartHeader from "../ShoppingCartHeader";
+import ShoppingCartHeader from "../../components/ShoppingCartHeader";
 import { useNavigate } from "react-router-dom";
 
 export default function CartDemo() {

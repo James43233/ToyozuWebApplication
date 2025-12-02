@@ -2,33 +2,33 @@ import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { Link } from "react-router-dom";
 import './index.css';
-import Dashboard from './pages/Dashboard.jsx';
-import Inventory from './pages/Inventory.jsx';
-import Admin from './pages/Admin.jsx';
-import Register from './pages/Register.jsx';
-import ProtectedRoute from './pages/ProtectedRoute.jsx'; // <--- updated import
+
+import Inventory from './pages/admin-page/Inventory.jsx';
+import Admin from './pages/admin-page/Admin.jsx';
+import Register from './pages/user-page/Register.jsx';
+import ProtectedRoute from './pages/admin-page/Inventory.jsx'; // <--- updated import
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
-import StartWeb from './pages/Start.jsx';
-import LoginPage from './pages/LoginPage.jsx';
-import ShoppingCart from './pages/ShoppingCart.jsx';
-import CartDemo from './pages/Cart-demo.jsx';
-import UserDashboard from './pages/UserDashboard.jsx';
-import AdminDashboard from './pages/AdminDashboard.jsx';
-import ProductTable from './components/ProductTable.jsx';
-import UploadForm from './components/UploadForm.jsx'
-import ProductsSection from './components/ProductsSection.jsx'
+import StartWeb from './pages/user-page/Start.jsx';
+import LoginPage from './pages/user-page/LoginPage.jsx';
+import ShoppingCart from './pages/user-page/ShoppingCart.jsx';
+import CartDemo from './pages/user-page/Cart-demo.jsx';
+import UserDashboard from './pages/user-page/UserDashboard.jsx';
+import AdminDashboard from './pages/admin-page/AdminDashboard.jsx';
+import ProductTable from './components/admin-components/ProductTable.jsx';
+import UploadForm from './components/admin-components/UploadForm.jsx'
+import ProductsSection from './components/admin-components/ProductsSection.jsx'
 import { AuthProvider } from "./Context/AuthContext";
-import Unauthorized from './components/unauthorized.jsx';
-import ProductDetail from "./pages/ProductDetails.jsx"; // create this
-import DisplayProducts from "./pages/DisplayProducts.jsx";
-import ProductNavi from "./components/ProductNavi.jsx"
-import ProductFiltered from "./components/ProductFiltered.jsx"
-import AddressSection from './components/AddressSection.jsx';
-import CheckoutPage from './pages/CheckOutPage.jsx';
-import PlaceOrder from './components/PlaceOrder.jsx';
-import OrderHistory from './components/OrderHistory.jsx';
-import OrderSection from './components/OrderSection.jsx';
-import AllProducts from "./pages/AllProducts.jsx";
+import Unauthorized from './components/user-components/unauthorized.jsx';
+import ProductDetail from "./pages/user-page/ProductDetails.jsx"; // create this
+import DisplayProducts from "./pages/user-page/DisplayProducts.jsx";
+import ProductNavi from "./components/user-components/ProductNavi.jsx"
+import ProductFiltered from "./components/user-components/ProductFiltered.jsx"
+import AddressSection from './components/user-components/AddressSection.jsx';
+import CheckoutPage from './pages/user-page/CheckOutPage.jsx';
+import PlaceOrder from './components/user-components/PlaceOrder.jsx';
+import OrderHistory from './components/user-components/OrderHistory.jsx';
+import OrderSection from './components/admin-components/OrderSection.jsx';
+import AllProducts from "./pages/user-page/AllProducts.jsx";
 
 
 
@@ -47,17 +47,6 @@ const router = createBrowserRouter([
   {
     path: "/unauthorized",
     element: <Unauthorized />,
-  },
-
-
-
-  {
-    path: "/Dashboard",
-    element: (
-      <ProtectedRoute>
-        <Dashboard />
-      </ProtectedRoute>
-    ),
   },
   {
     path: "/Inventory",

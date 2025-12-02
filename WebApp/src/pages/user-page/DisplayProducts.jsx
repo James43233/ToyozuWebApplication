@@ -2,10 +2,10 @@
 
 import { useState } from "react"
 
-import WebHeader from "../WebHeader"
-import Footer from "../Footer"
-import ProductNavi from "../components/ProductNavi.jsx"
-import ProductFiltered from "../components/ProductFiltered.jsx"
+import WebHeader from "../../components/WebHeader.jsx"
+import Footer from "../../components/Footer.jsx"
+import ProductNavi from "../../components/user-components/ProductNavi.jsx"
+import ProductFiltered from "../../components/user-components/ProductFiltered.jsx"
 
 import { useLocation } from "react-router-dom";
 

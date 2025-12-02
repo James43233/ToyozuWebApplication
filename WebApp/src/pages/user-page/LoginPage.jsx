@@ -2,9 +2,9 @@
 
 import React, { useState } from "react"
 import { useNavigate } from "react-router-dom"
-import logo from "../assets/Arrival.png"
-import emailLogo from "../assets/download.png"
-import passLogo from "../assets/password icon.png"
+import logo from "../../assets/Arrival.png"
+import emailLogo from "../../assets/download.png"
+import passLogo from "../../assets/password icon.png"
 
 export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false)

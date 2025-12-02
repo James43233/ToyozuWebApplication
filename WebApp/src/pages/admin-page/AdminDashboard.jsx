@@ -2,13 +2,13 @@
 
 import { useState, useEffect } from "react"
 import { Navigate } from "react-router-dom"
-import WebHeader from "../WebHeader"
+import WebHeader from "../../components/WebHeader"
 import axios from "axios";
-import UploadForm from "../components/UploadForm";
-import ProductTable from "../components/ProductTable";
-import OrderSection from "../components/OrderSection";
-import EmployeesSection from "../components/Employeesection";
-import InventorySection from "../components/InventorySection";
+import UploadForm from "../../components/admin-components/UploadForm";
+import ProductTable from "../../components/admin-components/ProductTable";
+import OrderSection from "../../components/admin-components/OrderSection";
+import EmployeesSection from "../../components/admin-components/Employeesection";
+import InventorySection from "../../components/admin-components/InventorySection";
 
 // Map numeric role_Id → permissions
 const ROLE_PERMISSIONS = {

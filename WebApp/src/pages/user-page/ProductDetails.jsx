@@ -10,11 +10,11 @@ import {
   RotateCcw,
 } from "lucide-react";
 import { useState, useEffect } from "react";
-import WebHeader from "../WebHeader.jsx";
-import WebFooter from "../Footer.jsx";
+import WebHeader from "../../components/WebHeader.jsx";
+import WebFooter from "../../components/Footer.jsx";
 import { useParams } from "react-router-dom";
 import axios from "axios";
-import ProductGrid from "../components/ProductGrid.jsx";
+import ProductGrid from "../../components/user-components/ProductGrid.jsx";
 import { toast } from "react-toastify";
 
 export default function ProductDetail() {

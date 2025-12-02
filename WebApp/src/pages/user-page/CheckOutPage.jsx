@@ -1,6 +1,6 @@
 "use client"
 import { useState, useEffect } from "react"
-import WebHeader from "../WebHeader"
+import WebHeader from "../../components/WebHeader"
 import axios from "axios";
 
 export default function CheckoutPage() {

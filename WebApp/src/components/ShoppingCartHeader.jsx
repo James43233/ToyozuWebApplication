@@ -1,7 +1,7 @@
-import "./App.css";
+import '../../src/App.css';
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import Logo from "./assets/Arrival.png";
+import Logo from "../assets/Arrival.png";
 import { Search, ShoppingCart, User } from "lucide-react";
 import axios from "axios";
 

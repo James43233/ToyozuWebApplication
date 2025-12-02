@@ -3,29 +3,28 @@
 import { Search, ShoppingCart, ChevronLeft, ChevronRight } from "lucide-react";
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import Header from "../Header.jsx";
-import bremboLogo from "../assets/brembo-logo.png";
-import boschLogo from "../assets/bosch-logo.png";
-import ngkLogo from "../assets/ngk-logo.png";
-import densoLogo from "../assets/denso-logo.png";
-import mobil1Logo from "../assets/mobil-1-logo.png";
-import castrolLogo from "../assets/castrol-logo.png";
-import michelinLogo from "../assets/michelin-logo.png";
-import bridgestoneLogo from "../assets/bridgestone-logo.png";
-import continentalLogo from "../assets/continental-logo.png";
-import acdelcoLogo from "../assets/acdelco-logo.png";
-import mannFilterLogo from "../assets/mann-filter-logo.png";
-import kybLogo from "../assets/kyb-logo.png";
-import automotiveBanner from "../assets/automotive-banner.png";
-import brakePadsBanner from "../assets/brake-pads-promotion-banner.png";
-import oilFiltersBanner from "../assets/oil-filters-sale-banner.png";
-import Logo from "../assets/Arrival.png";
-import WebHeader from "../WebHeader.jsx";
-import Footer from "../Footer.jsx";
-import ProductGrid from "../components/ProductGrid.jsx";
+import bremboLogo from "../../assets/brembo-logo.png";
+import boschLogo from "../../assets/bosch-logo.png";
+import ngkLogo from "../../assets/ngk-logo.png";
+import densoLogo from "../../assets/denso-logo.png";
+import mobil1Logo from "../../assets/mobil-1-logo.png";
+import castrolLogo from "../../assets/castrol-logo.png";
+import michelinLogo from "../../assets/michelin-logo.png";
+import bridgestoneLogo from "../../assets/bridgestone-logo.png";
+import continentalLogo from "../../assets/continental-logo.png";
+import acdelcoLogo from "../../assets/acdelco-logo.png";
+import mannFilterLogo from "../../assets/mann-filter-logo.png";
+import kybLogo from "../../assets/kyb-logo.png";
+import automotiveBanner from "../../assets/automotive-banner.png";
+import brakePadsBanner from "../../assets/brake-pads-promotion-banner.png";
+import oilFiltersBanner from "../../assets/oil-filters-sale-banner.png";
+import Logo from "../../assets/Arrival.png";
+import WebHeader from "../../components/WebHeader.jsx";
+import Footer from "../../components/Footer.jsx";
+import ProductGrid from "../../components/user-components/ProductGrid.jsx";
 import { Car, Zap, Wrench, Droplet, Circle, HelpCircle } from "lucide-react";
 
-import ToyozuGIF from "../assets/New.jpg";
+import ToyozuGIF from "../../assets/New.jpg";
 
 export default function ToyozuEcommerce() {
   const [categories, setCategories] = useState([]);
@@ -160,7 +159,7 @@ export default function ToyozuEcommerce() {
               <p className="text-white/100  drop-shadow-sm">
                 Select your car details to find compatible parts
               </p>
-              <div className="w-24 h-1 bg-gradient-to-r from-[#eb0505] to-red-400 mx-auto mt-4 rounded-full"></div>
+              <div className="w-24 h-1 bg-gradient-to-r from-[#ffdad4] to-[#5a261f] mx-auto mt-4 rounded-full"></div>
             </div>
 
             {/* Main container with white background */}
@@ -181,7 +180,7 @@ export default function ToyozuEcommerce() {
                         setSelectedMake(e.target.value);
                         setSelectedModel("");
                       }}
-                      className="w-full border-2 border-gray-200 rounded-lg p-3 bg-white focus:border-[#eb0505] focus:ring-2 focus:ring-red-100 transition-all"
+                      className="w-full border-2 border-gray-200 rounded-lg p-3 bg-white focus:border-[#904b40] focus:ring-2 focus:ring-red-100 transition-all"
                     >
                       <option value="">Select Brand</option>
                       {carMakes.map((make) => (
@@ -199,7 +198,7 @@ export default function ToyozuEcommerce() {
                       value={selectedModel}
                       onChange={(e) => setSelectedModel(e.target.value)}
                       disabled={!selectedMake}
-                      className="w-full border-2 border-gray-200 rounded-lg p-3 bg-white disabled:bg-gray-100 focus:border-[#eb0505] focus:ring-2 focus:ring-red-100 transition-all"
+                      className="w-full border-2 border-gray-200 rounded-lg p-3 bg-white disabled:bg-gray-100 focus:border-[#904b40] focus:ring-2 focus:ring-red-100 transition-all"
                     >
                       <option value="">Select Model</option>
                       {carModels
@@ -221,7 +220,7 @@ export default function ToyozuEcommerce() {
                       value={selectedYear}
                       onChange={(e) => setSelectedYear(e.target.value)}
                       disabled={!selectedModel}
-                      className="w-full border-2 border-gray-200 rounded-lg p-3 bg-white disabled:bg-gray-100 focus:border-[#eb0505] focus:ring-2 focus:ring-red-100 transition-all"
+                      className="w-full border-2 border-gray-200 rounded-lg p-3 bg-white disabled:bg-gray-100 focus:border-[#904b40] focus:ring-2 focus:ring-red-100 transition-all"
                     >
                       <option value="">Select Year</option>
                       {years.map((y) => (
@@ -234,7 +233,7 @@ export default function ToyozuEcommerce() {
                 <div className="lg:col-span-4 flex justify-center mt-4">
                   <button
                     onClick={handleSearch}
-                    className="bg-gradient-to-r from-[#eb0505] to-red-600 text-white px-8 py-3 rounded-lg font-semibold hover:scale-105 transition-all shadow-lg flex items-center space-x-2"
+                    className="bg-gradient-to-r from-[#904b40] to-red-600 text-white px-8 py-3 rounded-lg font-semibold hover:scale-105 transition-all shadow-lg flex items-center space-x-2"
                   >
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" 
@@ -283,7 +282,7 @@ export default function ToyozuEcommerce() {
                 <Link
                   key={category.id}
                   to={`/products?category=${encodeURIComponent(category.name)}`}
-                  className="bg-[#eb0505] text-white px-4 py-3 rounded-lg flex items-center space-x-2 font-medium hover:bg-[#d10404] hover:scale-105 transition-all duration-200 hover:shadow-lg transform"
+                  className="bg-[#ffdad4] text-white px-4 py-3 rounded-lg flex items-center space-x-2 font-medium hover:bg-[#5a261f] hover:scale-105 transition-all duration-200 hover:shadow-lg transform"
                   style={{
                     animation: `fadeInUp 0.4s ease-out ${i * 0.05}s both`,
                   }}
@@ -357,7 +356,7 @@ export default function ToyozuEcommerce() {
                     onClick={() => setCurrentBrandSlide(index)}
                     className={`w-2 h-2 rounded-full transition-colors ${
                       index === currentBrandSlide
-                        ? "bg-[#eb0505]"
+                        ? "bg-[#ffdad4]"
                         : "bg-gray-300"
                     }`}
                   />

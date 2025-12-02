@@ -2,7 +2,7 @@
 
 import React, { useState } from "react"
 import { useNavigate } from "react-router-dom"
-import logo from "../assets/Arrival.png"
+import logo from "../../assets/Arrival.png"
 
 function Register() {
   const [showPassword, setShowPassword] = useState(false)

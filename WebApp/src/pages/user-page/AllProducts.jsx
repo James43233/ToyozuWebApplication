@@ -3,9 +3,9 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { Link, useLocation } from "react-router-dom";
-import WebHeader from "../WebHeader";
-import Footer from "../Footer";
-import ProductNavi from "../components/ProductNavi.jsx";
+import WebHeader from "../../components/WebHeader.jsx";
+import Footer from "../../components/Footer.jsx";
+import ProductNavi from "../../components/user-components/ProductNavi.jsx";
 
 export default function AllProducts() {
   const [products, setProducts] = useState([]);

@@ -1,10 +1,10 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import WebHeader from "../WebHeader";
+import WebHeader from "../../components/WebHeader.jsx";
 import axios from "axios";
-import AddressSection from "../components/AddressSection.jsx";
-import OrderHistory from "../components/OrderHistory.jsx";
+import AddressSection from "../../components/user-components/AddressSection.jsx";
+import OrderHistory from "../../components/user-components/OrderHistory.jsx";
 
 export default function AccountDashboard() {
   const [user, setUser] = useState(null);
