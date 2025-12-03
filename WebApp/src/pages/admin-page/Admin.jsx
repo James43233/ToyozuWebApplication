@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import Header from "../Header.jsx";
-import "../App.css";
+import Header from "../../components/WebHeader.jsx";
+import "../../App.css";
 import { useNavigate } from "react-router-dom"; // Import useNavigate
 
 function Admin() {

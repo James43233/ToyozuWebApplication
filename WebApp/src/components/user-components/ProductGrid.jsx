@@ -57,7 +57,7 @@ export default function ProductGrid() {
                   className="w-full h-[220px] object-cover rounded-t-lg"
                 />
                 {product.discount > 0 && (
-                  <span className="absolute top-2 right-2 bg-red-600 text-white px-2 py-1 rounded-full text-xs font-bold">
+                  <span className="absolute top-2 right-2 bg-[#ffdad4] text-white px-2 py-1 rounded-full text-xs font-bold">
                     -{product.discount}%
                   </span>
                 )}
@@ -121,7 +121,7 @@ export default function ProductGrid() {
                       </span>
                     </div>
                   ) : (
-                    <span className="text-sm font-bold text-red-600">
+                    <span className="text-sm font-bold text-[#73342b]">
                       ₱{Number(product.selling_price).toFixed(2)}
                     </span>
                   )}
@@ -132,7 +132,7 @@ export default function ProductGrid() {
                   disabled={product.quantity <= 0}
                   className={`w-full py-1.5 rounded text-xs font-medium transition-colors ${
                     product.quantity > 0
-                      ? "bg-red-600 text-white hover:bg-red-700"
+                      ? "bg-[#ffdad4] text-white hover:bg-[#5a261f]"
                       : "bg-gray-300 text-gray-500 cursor-not-allowed"
                   }`}
                 >
@@ -147,8 +147,8 @@ export default function ProductGrid() {
       {/* More Button */}
       {visibleCount < products.length && (
         <Link
-          to="/AllProducts" // 👈 This route will go to your full product list page
-          className="bg-[#eb0505] text-white px-8 py-2 rounded-full font-semibold hover:bg-red-700 transition mt-[20px] max-w-[100px] flex items-center justify-center mx-auto mb-[40px]"
+          to="/all-products" // 👈 This route will go to your full product list page
+          className="bg-[#ffdad4] text-white px-8 py-2 rounded-full font-semibold hover:bg-[#5a261f] transition mt-[20px] max-w-[100px] flex items-center justify-center mx-auto mb-[40px]"
         >
           More
         </Link>

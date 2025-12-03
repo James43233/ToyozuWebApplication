@@ -2,45 +2,44 @@ import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { Link } from "react-router-dom";
 import './index.css';
-import Dashboard from './pages/Dashboard.jsx';
-import Inventory from './pages/Inventory.jsx';
-import Admin from './pages/Admin.jsx';
-import Register from './pages/Register.jsx';
-import ProtectedRoute from './pages/ProtectedRoute.jsx'; // <--- updated import
+
+
+
+import Register from './pages/user-page/register-page.jsx';
+import ProtectedRoute from './pages/admin-page/protected-route.jsx'; // <--- updated import
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
-import StartWeb from './pages/Start.jsx';
-import LoginPage from './pages/LoginPage.jsx';
-import ShoppingCart from './pages/ShoppingCart.jsx';
-import CartDemo from './pages/Cart-demo.jsx';
-import UserDashboard from './pages/UserDashboard.jsx';
-import AdminDashboard from './pages/AdminDashboard.jsx';
-import ProductTable from './components/ProductTable.jsx';
-import UploadForm from './components/UploadForm.jsx'
-import ProductsSection from './components/ProductsSection.jsx'
+import StartWeb from './pages/user-page/landing-page.jsx';
+import LoginPage from './pages/user-page/login-page.jsx';
+import ShoppingCart from './pages/user-page/shopping-cart-page.jsx';
+import CartDemo from './pages/user-page/cart-page.jsx';
+import UserDashboard from './pages/user-page/user-dashboard-page.jsx';
+import ProductTable from './components/admin-components/ProductTable.jsx';
+import UploadForm from './components/admin-components/UploadForm.jsx'
+import ProductsSection from './components/admin-components/ProductsSection.jsx'
 import { AuthProvider } from "./Context/AuthContext";
-import Unauthorized from './components/unauthorized.jsx';
-import ProductDetail from "./pages/ProductDetails.jsx"; // create this
-import DisplayProducts from "./pages/DisplayProducts.jsx";
-import ProductNavi from "./components/ProductNavi.jsx"
-import ProductFiltered from "./components/ProductFiltered.jsx"
-import AddressSection from './components/AddressSection.jsx';
-import CheckoutPage from './pages/CheckOutPage.jsx';
-import PlaceOrder from './components/PlaceOrder.jsx';
-import OrderHistory from './components/OrderHistory.jsx';
-import OrderSection from './components/OrderSection.jsx';
-import AllProducts from "./pages/AllProducts.jsx";
+import Unauthorized from './components/user-components/unauthorized.jsx';
+import ProductDetail from "./pages/user-page/product-details.jsx"; // create this
+import DisplayProducts from "./pages/user-page/display-product-page.jsx";
+import ProductNavi from "./components/user-components/ProductNavi.jsx"
+import ProductFiltered from "./components/user-components/ProductFiltered.jsx"
+import AddressSection from './components/user-components/AddressSection.jsx';
+import CheckoutPage from './pages/user-page/check-out-page.jsx';
+import PlaceOrder from './components/user-components/PlaceOrder.jsx';
+import OrderHistory from './components/user-components/OrderHistory.jsx';
+import OrderSection from './components/admin-components/OrderSection.jsx';
+import AllProducts from "./pages/user-page/all-products.jsx";
+import AdminDashboard from './pages/admin-page/admin-dashboard.jsx'
 
 
 
 const router = createBrowserRouter([
   { path: "/", element: <StartWeb />},
-  { path: "/Register", element: <Register /> },
-  { path: "/LoginPage", element: <LoginPage /> },
-  { path: "/Start", element: <StartWeb /> },
-  { path: "/ProductNavi", element: <ProductNavi /> },
-  { path: "/ProductFiltered", element: <ProductFiltered /> },
-  { path: "/PlaceOrder", element: <PlaceOrder /> },
-  { path: "/AllProducts", element: <AllProducts /> },
+  { path: "/register", element: <Register /> },
+  { path: "/login-page", element: <LoginPage /> },
+  { path: "/product-navigator", element: <ProductNavi /> },
+  { path: "/product-filtered", element: <ProductFiltered /> },
+  { path: "/place-order", element: <PlaceOrder /> },
+  { path: "/all-products", element: <AllProducts /> },
   
 
 
@@ -48,35 +47,16 @@ const router = createBrowserRouter([
     path: "/unauthorized",
     element: <Unauthorized />,
   },
-
-
-
-  {
-    path: "/Dashboard",
+    {
+    path: "/admin-dashboard",
     element: (
-      <ProtectedRoute>
-        <Dashboard />
+      <ProtectedRoute requiredRole={1}>
+        <AdminDashboard />
       </ProtectedRoute>
     ),
   },
   {
-    path: "/Inventory",
-    element: (
-      <ProtectedRoute>
-        <Inventory />
-      </ProtectedRoute>
-    ),
-  },
-  {
-    path: "/Admin",
-    element: (
-      <ProtectedRoute>
-        <Admin />
-      </ProtectedRoute>
-    ),
-  },
-  {
-    path: "/ShoppingCart",
+    path: "/shopping-cart",
     element: (
       <ProtectedRoute>
         <ShoppingCart />
@@ -84,7 +64,7 @@ const router = createBrowserRouter([
     ),
   },
   {
-    path: "/Cart-demo",
+    path: "/cart",
     element: (
       <ProtectedRoute>
         <CartDemo />
@@ -92,24 +72,16 @@ const router = createBrowserRouter([
     ),
   },
   {
-    path: "/UserDashboard",
+    path: "/user-dashboard",
     element: (
       <ProtectedRoute>
         <UserDashboard />
       </ProtectedRoute>
     ),
   },
-  {
-    path: "/AdminDashboard",
-    element: (
-      <ProtectedRoute requiredRole={1}>
-        <AdminDashboard />
-      </ProtectedRoute>
-    ),
-  },
 
   {
-    path: "/ProductTable",
+    path: "/product-table",
     element: (
       <ProtectedRoute>
         <ProductTable />
@@ -117,7 +89,7 @@ const router = createBrowserRouter([
     ),
   },
   {
-    path: "/UploadForm",
+    path: "/upload-form",
     element: (
       <ProtectedRoute>
         <UploadForm />
@@ -125,7 +97,7 @@ const router = createBrowserRouter([
     ),
   },
   {
-    path: "/ProductsSection",
+    path: "/products-section",
     element: (
       <ProtectedRoute>
         <ProductsSection />
@@ -149,7 +121,7 @@ const router = createBrowserRouter([
       </ProtectedRoute>
     ),
   },
-  { path: "/DisplayProducts",
+  { path: "/display-products",
     element: (
       <ProtectedRoute>
         <DisplayProducts />
@@ -164,14 +136,14 @@ const router = createBrowserRouter([
       </ProtectedRoute>
     ),
   },
-  { path: "/AddressSection",
+  { path: "/address-section",
     element: (
       <ProtectedRoute>
         <AddressSection />
       </ProtectedRoute>
     ),
   },
-  { path: "/CheckoutPage",
+  { path: "/check-out-page",
     element: (
       <ProtectedRoute>
         <CheckoutPage />
@@ -179,7 +151,7 @@ const router = createBrowserRouter([
     ),
   },
   {
-    path: "/OrderHistory",
+    path: "/order-history",
     element: (
       <ProtectedRoute>
         <OrderHistory />
@@ -187,16 +159,13 @@ const router = createBrowserRouter([
     ),
   },
   {
-    path: "/OrderSection",
+    path: "/order-section",
     element: (
       <ProtectedRoute>
         <OrderSection />
       </ProtectedRoute>
     ),
   }
-
-
-
 
 
 ]);

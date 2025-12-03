@@ -1,7 +1,7 @@
-import './App.css';
+import '../../src/App.css';
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import Logo from "./assets/Arrival.png";
+import Logo from "../assets/Arrival.png";
 import { Search, ShoppingCart, User } from "lucide-react";
 import axios from "axios";
 
@@ -44,7 +44,7 @@ function WebHeader() {
       {/* Logo */}
       <div
         className="flex items-center justify-center cursor-pointer flex-1"
-        onClick={() => navigate("/Start")}
+        onClick={() => navigate("/")}
       >
         <img src={Logo} alt="Toyozu Logo" className="h-[60px] w-auto" />
       </div>
@@ -67,7 +67,7 @@ function WebHeader() {
           <div className="relative">
             <ShoppingCart
               className="w-6 h-6 text-gray-700 cursor-pointer hover:text-red-600 transition"
-              onClick={() => navigate("/Cart-demo")}
+              onClick={() => navigate("/cart")}
             />
             <span className="absolute -bottom-1 -right-2 bg-red-600 text-white text-xs font-semibold rounded-full w-4 h-4 flex items-center justify-center">
               {cartCount || 0}
@@ -86,7 +86,7 @@ function WebHeader() {
               <div className="absolute right-0 mt-2 w-44 bg-white border rounded-md shadow-lg py-2 z-50">
                 {/* Account */}
                 <button
-                  onClick={() => { setMenuOpen(false); navigate("/UserDashboard"); }}
+                  onClick={() => { setMenuOpen(false); navigate("/user-dashboard"); }}
                   className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                 >
                   Account
@@ -94,7 +94,7 @@ function WebHeader() {
 
                 {/* Purchases */}
                 <button
-                  onClick={() => { setMenuOpen(false); navigate("/Purchases"); }}
+                  onClick={() => { setMenuOpen(false); navigate("/unauthorized"); }}
                   className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                 >
                   Purchases
@@ -103,7 +103,7 @@ function WebHeader() {
                 {/* Admin Dashboard (only for roles 1,2,3) */}
                 {(roleid === "1" || roleid === "2" || roleid === "3") && (
                   <button
-                    onClick={() => { setMenuOpen(false); navigate("/AdminDashboard"); }}
+                    onClick={() => { setMenuOpen(false); navigate("/admin-dashboard"); }}
                     className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                   >
                     Admin Dashboard
@@ -123,14 +123,14 @@ function WebHeader() {
         ) : (
           <div className="flex items-center gap-4">
             <button
-              onClick={() => navigate("/LoginPage")}
+              onClick={() => navigate("/login-page")}
               className="text-sm font-medium text-gray-700 hover:text-blue-600 transition"
             >
               Sign In
             </button>
             <span className="h-6 border-l border-red-600"></span>
             <button
-              onClick={() => navigate("/Register")}
+              onClick={() => navigate("/register")}
               className="text-sm font-medium text-gray-700 hover:text-red-600 transition"
             >
               Sign Up

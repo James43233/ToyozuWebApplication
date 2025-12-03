@@ -1,7 +1,7 @@
-import "./App.css";
+import '../../src/App.css';
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import Logo from "./assets/Arrival.png";
+import Logo from "../assets/Arrival.png";
 import { Search, ShoppingCart, User } from "lucide-react";
 import axios from "axios";
 
@@ -39,7 +39,7 @@ function CartHeader() {
       {/* Logo + Label */}
       <div
         className="flex items-center cursor-pointer flex-1 justify-center"
-        onClick={() => navigate("/Start")}
+        onClick={() => navigate("/")}
       >
         <img src={Logo} alt="Toyozu Logo" className="h-[60px] w-auto" />
         <span className="ml-4 text-xl font-bold">Shopping Cart</span>
@@ -63,7 +63,7 @@ function CartHeader() {
         <div className="relative">
           <ShoppingCart
             className="w-6 h-6 text-gray-700 cursor-pointer hover:text-red-600 transition"
-            onClick={() => navigate("/Cart-demo")}
+            onClick={() => navigate("/cart")}
           />
           <span className="absolute -bottom-1 -right-2 bg-red-600 text-white text-xs font-semibold rounded-full w-4 h-4 flex items-center justify-center">
             {cartCount || 0}
@@ -82,7 +82,7 @@ function CartHeader() {
                 <button
                   onClick={() => {
                     setMenuOpen(false);
-                    navigate("/UserDashboard");
+                    navigate("/user-dashboard");
                   }}
                   className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                 >
@@ -92,7 +92,7 @@ function CartHeader() {
                 <button
                   onClick={() => {
                     setMenuOpen(false);
-                    navigate("/Purchases");
+                    navigate("/unauthorized");
                   }}
                   className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                 >
@@ -103,7 +103,7 @@ function CartHeader() {
                   <button
                     onClick={() => {
                       setMenuOpen(false);
-                      navigate("/AdminDashboard");
+                      navigate("/admin-dashboard");
                     }}
                     className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                   >
@@ -126,14 +126,14 @@ function CartHeader() {
         ) : (
           <div className="flex items-center gap-4">
             <button
-              onClick={() => navigate("/LoginPage")}
+              onClick={() => navigate("/login-page")}
               className="text-sm font-medium text-gray-700 hover:text-blue-600 transition"
             >
               Sign In
             </button>
             <span className="h-6 border-l border-red-600"></span>
             <button
-              onClick={() => navigate("/Register")}
+              onClick={() => navigate("/register")}
               className="text-sm font-medium text-gray-700 hover:text-red-600 transition"
             >
               Sign Up

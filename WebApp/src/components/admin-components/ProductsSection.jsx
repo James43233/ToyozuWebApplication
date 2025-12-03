@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
-import UploadForm from "../components/UploadForm";
-import ProductTable from "../components/ProductTable";
+import UploadForm from "./UploadForm";
+import ProductTable from "./ProductTable";
 
 export default function ProductsSection() {
   const [suppliers, setSuppliers] = useState([]);
